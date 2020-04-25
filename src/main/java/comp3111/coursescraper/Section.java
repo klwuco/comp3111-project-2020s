@@ -32,15 +32,17 @@ public class Section {
 		slots[numSlots++] = slot.clone();
 	}
 
-    public Slot getSlot(int i) {
-		if (i >= 0 && i < numSlots)
-			return slots[i];
-		return null;
+    public Slot[] getSlot() {
+			return slots;
 	}
 
     public int getNumSlots() {
 		return numSlots;
 	}
+
+    public String getType() {
+        return type;
+    }
 
     public void setEnrollState(Boolean enroll){
         enrolled = enroll;
@@ -49,5 +51,10 @@ public class Section {
     public Boolean getEnrollState(){
         return enrolled;
     }
+
+    @Override
+    public String toString() {
+		return sectionCode + " (" + sectionID + ")";
+	}
 
 }
