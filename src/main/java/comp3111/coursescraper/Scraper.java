@@ -11,6 +11,10 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.DomText;
 import java.util.Vector;
+import java.time.LocalTime;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType; 
 
 
 /**
@@ -87,13 +91,22 @@ public class Scraper {
 		client.getOptions().setJavaScriptEnabled(false);
 	}
 
-	private void addSlot(HtmlElement e, Course c, boolean secondRow) {
-		String times[] =  e.getChildNodes().get(secondRow ? 0 : 3).asText().split(" ");
+	private void addSlot(HtmlElement e, Section section, Course c, boolean secondRow) {
+		String[] date_times = e.getChildNodes().get(secondRow ? 0 : 3).asText().split("\n");
+		String times[] =  date_times[date_times.length-1].split(" ");
 		String venue = e.getChildNodes().get(secondRow ? 1 : 4).asText();
+		String instructors = e.getChildNodes().get(secondRow ? 2 : 5).asText();
+		
+		if(instructors != null && !instructors.equals("TBA"))
+			for(String instructor : instructors.split("\n"))
+				c.addInstructor(instructor);
+
 		if (times[0].equals("TBA"))
 			return;
+
 		for (int j = 0; j < times[0].length(); j+=2) {
 			String code = times[0].substring(j , j + 2);
+
 			if (Slot.DAYS_MAP.get(code) == null)
 				break;
 			Slot s = new Slot();
@@ -101,7 +114,15 @@ public class Scraper {
 			s.setStart(times[1]);
 			s.setEnd(times[3]);
 			s.setVenue(venue);
-			c.addSlot(s);	
+			section.addSlot(s);
+
+			if(s.getDay() == 1) {
+				LocalTime time = LocalTime.parse("15:10:00");
+				if( time.compareTo(s.getStart()) >= 0  && time.compareTo(s.getEnd()) <= 0 )
+					if(instructors != null && !instructors.equals("TBA"))
+						for(String instructor : instructors.split("\n"))
+							c.addFilterInstructor(instructor);			
+			}
 		}
 
 	}
@@ -112,7 +133,6 @@ public class Scraper {
 			
 			HtmlPage page = client.getPage(baseurl + "/" + term + "/subject/" + sub);
 
-			
 			List<?> items = (List<?>) page.getByXPath("//div[@class='course']");
 			
 			Vector<Course> result = new Vector<Course>();
@@ -137,10 +157,13 @@ public class Scraper {
 				
 				List<?> sections = (List<?>) htmlItem.getByXPath(".//tr[contains(@class,'newsect')]");
 				for ( HtmlElement e: (List<HtmlElement>)sections) {
-					addSlot(e, c, false);
+					String s = e.getChildNodes().get(1).asText();
+					Section section = new Section(s);
+					addSlot(e, section, c, false);
 					e = (HtmlElement)e.getNextSibling();
 					if (e != null && !e.getAttribute("class").contains("newsect"))
-						addSlot(e, c, true);
+						addSlot(e, section, c, true);
+					c.addSection(section);
 				}
 				
 				result.add(c);
@@ -148,7 +171,11 @@ public class Scraper {
 			client.close();
 			return result;
 		} catch (Exception e) {
-			System.out.println(e);
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error Dialog");
+			alert.setHeaderText(null);
+			alert.setContentText("404 NOT FOUND! \n Please Check the Base URL, Term and Subject.");
+			alert.showAndWait();
 		}
 		return null;
 	}

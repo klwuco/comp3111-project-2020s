@@ -1,31 +1,34 @@
 package comp3111.coursescraper;
 
-
+import java.util.Vector;
 
 public class Course {
 	private static final int DEFAULT_MAX_SLOT = 20;
 	
-	private String title ; 
-	private String description ;
+	private String title; 
+	private String description;
 	private String exclusion;
-	private Slot [] slots;
-	private int numSlots;
+	private Vector<String> instructors;
+	private Vector<String> targetInstructors;
+	private Section [] sections;
+	private int numSections;
 	
 	public Course() {
-		slots = new Slot[DEFAULT_MAX_SLOT];
-		for (int i = 0; i < DEFAULT_MAX_SLOT; i++) slots[i] = null;
-		numSlots = 0;
+		sections = new Section[DEFAULT_MAX_SLOT];
+		instructors = new Vector<String>();
+		targetInstructors = new Vector<String>();
+		for (int i = 0; i < DEFAULT_MAX_SLOT; i++) 
+			sections[i] = null;
+		numSections = 0;
 	}
-	
-	public void addSlot(Slot s) {
-		if (numSlots >= DEFAULT_MAX_SLOT)
+
+	public void addSection(Section s) {
+		if (numSections >= DEFAULT_MAX_SLOT)
 			return;
-		slots[numSlots++] = s.clone();
+		sections[numSections++] = s;
 	}
-	public Slot getSlot(int i) {
-		if (i >= 0 && i < numSlots)
-			return slots[i];
-		return null;
+	public Section[] getSection() {
+		return sections;
 	}
 
 	/**
@@ -70,19 +73,24 @@ public class Course {
 		this.exclusion = exclusion;
 	}
 
-	/**
-	 * @return the numSlots
-	 */
-	public int getNumSlots() {
-		return numSlots;
+	public void addInstructor(String instructor) {
+		if(!instructors.contains(instructor))
+			instructors.add(instructor);
+
 	}
 
-	/**
-	 * @param numSlots the numSlots to set
-	 */
-	public void setNumSlots(int numSlots) {
-		this.numSlots = numSlots;
+	public Vector<String> getInstructor() {
+		return instructors;
 	}
-	
+
+	public void addFilterInstructor(String instructor) {
+		if(!targetInstructors.contains(instructor))
+			targetInstructors.add(instructor);
+
+	}
+
+	public Vector<String> getFilterInstructor() {
+		return targetInstructors;
+	}
 
 }
