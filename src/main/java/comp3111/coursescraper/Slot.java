@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.time.LocalTime;
 import java.util.Locale;
 import java.time.format.DateTimeFormatter;
+import static java.time.temporal.ChronoUnit.MINUTES;
 
 public class Slot {
 	private int day;
@@ -90,6 +91,14 @@ public class Slot {
 	 */
 	public void setDay(int day) {
 		this.day = day;
+	}
+	
+	/**
+	 * Get the duration of slot in minutes
+	 * @return the duration in minutes
+	 */
+	public int getDuration() {
+		return (int) start.until(end, MINUTES);
 	}
 
 }
