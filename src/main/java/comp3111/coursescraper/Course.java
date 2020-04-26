@@ -93,4 +93,8 @@ public class Course {
 		return targetInstructors;
 	}
 
+	public int getNumSections(){
+		return numSections;
+	}
+
 }

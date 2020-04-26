@@ -24,7 +24,23 @@ public class Section {
 		slots = new Slot[DEFAULT_MAX_SLOT];
 		for (int i = 0; i < DEFAULT_MAX_SLOT; i++) slots[i] = null;
 		numSlots = 0;
-	}
+    }
+    
+    public void setSectionID(String sectionID){
+        this.sectionID = sectionID;
+    }
+
+    public String getSectionID(){
+        return sectionID;
+    }
+
+    public void setSectionCode(String sectionCode){
+        this.sectionCode = sectionCode;
+    }
+
+    public String getSectionCode(){
+        return sectionCode;
+    }
 
 	public void addSlot(Slot slot){
 		if (numSlots >= DEFAULT_MAX_SLOT)
@@ -33,8 +49,12 @@ public class Section {
 	}
 
     public Slot[] getSlot() {
-			return slots;
-	}
+        return slots;
+    }
+    
+    public Slot getSlot(int i){
+        return slots[i];
+    }
 
     public int getNumSlots() {
 		return numSlots;
