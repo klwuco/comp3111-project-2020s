@@ -11,6 +11,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.DomText;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import java.time.LocalTime;
 
 import javafx.scene.control.Alert;
@@ -127,21 +128,41 @@ public class Scraper {
 
 	}
 
+	public String[] scrapeSubject(String baseurl, String term) {
+		
+		try {
+			HtmlPage page = client.getPage(baseurl + "/" + term + "/");
+			List<?> items = (List<?>) page.getByXPath("//div[@class='depts']");
+			Vector<String> result = new Vector<String>();
+			HtmlElement htmlItem = (HtmlElement) items.get(0);
+			List<?> subjectList = (List<?>) htmlItem.getByXPath(".//a");
+			client.close();
+			return ((List<HtmlElement>)subjectList).stream().map( e -> e.getChildNodes().get(0).asText()).toArray(String[]::new);
+		}		
+		catch (Exception e) {
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle("Error Dialog");
+			alert.setHeaderText(null);
+			alert.setContentText("404 NOT FOUND! \n Please Check the Base URL and Term.");
+			alert.showAndWait();
+		}
+		return null;
+
+	}
+
 	public List<Course> scrape(String baseurl, String term, String sub) {
 
 		try {
 			
 			HtmlPage page = client.getPage(baseurl + "/" + term + "/subject/" + sub);
-
-			List<?> items = (List<?>) page.getByXPath("//div[@class='course']");
-			
+			List<?> items = (List<?>) page.getByXPath("//div[@class='course']");			
 			Vector<Course> result = new Vector<Course>();
 
 			for (int i = 0; i < items.size(); i++) {
 				Course c = new Course();
-				HtmlElement htmlItem = (HtmlElement) items.get(i);
-				
+				HtmlElement htmlItem = (HtmlElement) items.get(i);				
 				HtmlElement title = (HtmlElement) htmlItem.getFirstByXPath(".//h2");
+
 				c.setTitle(title.asText());
 				
 				List<?> popupdetailslist = (List<?>) htmlItem.getByXPath(".//div[@class='popupdetail']/table/tbody/tr");
@@ -170,6 +191,7 @@ public class Scraper {
 			}
 			client.close();
 			return result;
+
 		} catch (Exception e) {
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("Error Dialog");
