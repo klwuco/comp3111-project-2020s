@@ -3,11 +3,14 @@ package comp3111.coursescraper;
 import java.awt.event.ActionEvent;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType; 
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
+
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
@@ -26,7 +29,18 @@ public class Controller {
 
     private String[] subjects;
 
+    private String[] consoleText = new String[TabLabel.values().length];
+
     private Scraper scraper = new Scraper();
+
+    enum TabLabel {
+        Main,
+        BackEnd,
+        Filter,
+        Timetable,
+        AllSubject,
+        SFQ
+    }
 
     @FXML
     private Tab tabMain;
@@ -79,10 +93,9 @@ public class Controller {
     @FXML
     void allSubjectSearch() {
         new Thread(() -> {
-            if(!subjectIsSearched()) return;
+            if(!subjectIsSearched(true)) return;
             progressbar.setProgress(0);
-            final int ALL_SUBJECT_COUNT = subjects.length;
-            final double increment = 1.0 / ALL_SUBJECT_COUNT;
+            final double increment = 1.0 / subjects.length;
             int counted_course = 0;
             for (String subject : subjects) {
                 counted_course += searchCourse(subject);
@@ -91,8 +104,10 @@ public class Controller {
                 try {Thread.sleep(100);} catch (Exception e) {}
             }
             progressbar.setProgress(1);
+
             String newline = "Total Number of Courses fetched:\n";
             newline += Integer.toString(counted_course) + "\n";
+            consoleText[TabLabel.AllSubject.ordinal()] = newline;
             textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
         }).start();
     }
@@ -111,8 +126,9 @@ public class Controller {
     void search() {
 
         new Thread(() -> {
-            subjectIsSearched();
-            searchCourse(textfieldSubject.getText());
+            subjectIsSearched(false);
+            if(subjects != null)
+                searchCourse(textfieldSubject.getText());
         }).start();
 
     	//Add a random block on Saturday
@@ -134,23 +150,43 @@ public class Controller {
     	
     }
 
-    private Boolean subjectIsSearched() {
-        if (subjects == null){
-            subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
-            int ALL_SUBJECT_COUNT = subjects.length;
-            String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(ALL_SUBJECT_COUNT) + "\n";
-            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+    private Boolean subjectIsSearched(Boolean allSubject) {
+        if (subjects != null) return true;
+        
+        subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
+        if(subjects == null){
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL and Term.");
+                alert.showAndWait();
+            });
             return false;
         }
-        else
-            return true;
+
+        String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(subjects.length) + "\n";
+        consoleText[TabLabel.AllSubject.ordinal()] = newline;
+        if(allSubject)
+            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+        return false;
+        
     }
 
     private int searchCourse(String subject){
         
     	List<Course> courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(), subject);
 
-    	// courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
+        if(courses == null) {
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL, Term and Subject.");
+                alert.showAndWait();
+            });
+            return 0;
+        }
 
         int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
 
@@ -164,7 +200,8 @@ public class Controller {
         } );
 
     	for (Course c : courses) {
-    		String newline = c.getTitle() + "\n";
+            String courseTitle = c.getTitle() + "\n";
+    		String newline = new String();
             Boolean counted = false;
             for(String instructor : c.getFilterInstructor())
                 if(INSTRUCTOR_NAME.contains(instructor))
@@ -174,6 +211,8 @@ public class Controller {
                 if(section != null){
                     if(!counted && section.getType() != null){
                         counted = true;
+                        courseTitle += newline;
+                        newline = courseTitle;
                         ++NUMBER_OF_COURSES;
                     }
                     ++NUMBER_OF_SECTIONS;
@@ -183,7 +222,8 @@ public class Controller {
                             newline += section + " Slot " + i++ + ":" + t + "\n";
                 }
     		}
-    		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+            if(counted)
+    		    textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
             try {Thread.sleep(100);} catch (Exception e) {}
     	}
 
@@ -195,8 +235,10 @@ public class Controller {
             newline += instructor + ", ";
         newline = newline.substring(0, newline.length() - 2);
         newline += "\n";
-        
-        textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+
+        consoleText[TabLabel.BackEnd.ordinal()] = newline;
+
+        consoleText[TabLabel.Main.ordinal()] = textAreaConsole.getText();
 
         return courses.size();
     }
