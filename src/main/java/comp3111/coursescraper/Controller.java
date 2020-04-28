@@ -26,6 +26,8 @@ public class Controller {
 
     private String[] subjects;
 
+    private Scraper scraper = new Scraper();
+
     @FXML
     private Tab tabMain;
 
@@ -73,72 +75,6 @@ public class Controller {
 
     @FXML
     private TextArea textAreaConsole;
-    
-    private Scraper scraper = new Scraper();
-    
-    private Boolean subjectIsSearched() {
-        if (subjects == null){
-            subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
-            int ALL_SUBJECT_COUNT = subjects.length;
-            String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(ALL_SUBJECT_COUNT) + "\n";
-            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
-            return false;
-        }
-        else
-            return true;
-    }
-
-    private int searchCourse(String subject){
-        
-    	List<Course> v = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(), subject);
-        int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
-
-        Vector<String> INSTRUCTOR_NAME = new Vector<String>();
-
-        v.forEach( c -> {
-            c.getInstructor().forEach( instructor -> {
-                if(!INSTRUCTOR_NAME.contains(instructor))
-                    INSTRUCTOR_NAME.add(instructor);
-            });
-        } );
-
-    	for (Course c : v) {
-    		String newline = c.getTitle() + "\n";
-            Boolean counted = false;
-            for(String instructor : c.getFilterInstructor())
-                if(INSTRUCTOR_NAME.contains(instructor))
-                    INSTRUCTOR_NAME.remove(instructor);
-            Collections.sort(INSTRUCTOR_NAME);
-    		for (Section section : c.getSection()) {
-                if(section != null){
-                    if(!counted && section.getType() != null){
-                        counted = true;
-                        ++NUMBER_OF_COURSES;
-                    }
-                    ++NUMBER_OF_SECTIONS;
-                    int i = 0;
-                    for(Slot t : section.getSlot())
-                        if(t != null)
-                            newline += section + " Slot " + i++ + ":" + t + "\n";
-                }
-    		}
-    		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
-            try {Thread.sleep(100);} catch (Exception e) {}
-    	}
-
-        String newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
-        newline += "Total Number of Course : " + Integer.toString(NUMBER_OF_COURSES) + "\n";
-        newline += "Instructors who has teaching assignment this term but does not need to teach at Tu 3:10pm : ";
-        
-        for(String instructor : INSTRUCTOR_NAME)
-            newline += instructor + ", ";
-        newline = newline.substring(0, newline.length() - 2);
-        newline += "\n";
-        
-        textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
-
-        return v.size();
-    }
 
     @FXML
     void allSubjectSearch() {
@@ -194,9 +130,75 @@ public class Controller {
     	randomLabel.setMaxHeight(60);
     
     	ap.getChildren().addAll(randomLabel);
+    	 	
     	
-    	
-    	
+    }
+
+    private Boolean subjectIsSearched() {
+        if (subjects == null){
+            subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
+            int ALL_SUBJECT_COUNT = subjects.length;
+            String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(ALL_SUBJECT_COUNT) + "\n";
+            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+            return false;
+        }
+        else
+            return true;
+    }
+
+    private int searchCourse(String subject){
+        
+    	List<Course> courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(), subject);
+
+    	// courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
+
+        int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
+
+        Vector<String> INSTRUCTOR_NAME = new Vector<String>();
+
+        courses.forEach( c -> {
+            c.getInstructor().forEach( instructor -> {
+                if(!INSTRUCTOR_NAME.contains(instructor))
+                    INSTRUCTOR_NAME.add(instructor);
+            });
+        } );
+
+    	for (Course c : courses) {
+    		String newline = c.getTitle() + "\n";
+            Boolean counted = false;
+            for(String instructor : c.getFilterInstructor())
+                if(INSTRUCTOR_NAME.contains(instructor))
+                    INSTRUCTOR_NAME.remove(instructor);
+            Collections.sort(INSTRUCTOR_NAME);
+    		for (Section section : c.getSection()) {
+                if(section != null){
+                    if(!counted && section.getType() != null){
+                        counted = true;
+                        ++NUMBER_OF_COURSES;
+                    }
+                    ++NUMBER_OF_SECTIONS;
+                    int i = 0;
+                    for(Slot t : section.getSlot())
+                        if(t != null)
+                            newline += section + " Slot " + i++ + ":" + t + "\n";
+                }
+    		}
+    		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+            try {Thread.sleep(100);} catch (Exception e) {}
+    	}
+
+        String newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
+        newline += "Total Number of Course : " + Integer.toString(NUMBER_OF_COURSES) + "\n";
+        newline += "Instructors who has teaching assignment this term but does not need to teach at Tu 3:10pm : ";
+        
+        for(String instructor : INSTRUCTOR_NAME)
+            newline += instructor + ", ";
+        newline = newline.substring(0, newline.length() - 2);
+        newline += "\n";
+        
+        textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+
+        return courses.size();
     }
 
 }
