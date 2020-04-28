@@ -113,6 +113,7 @@ public class Controller {
     
     private Scraper scraper = new Scraper();
     
+    private List<Course> courses;
     @FXML
     void allSubjectSearch() {
     	
@@ -130,19 +131,19 @@ public class Controller {
 
     @FXML
     void search() {
-    	List<Course> v = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
+    	courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
         int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
 
         Vector<String> INSTRUCTOR_NAME = new Vector<String>();
 
-        v.forEach( c -> {
+        courses.forEach( c -> {
             c.getInstructor().forEach( instructor -> {
                 if(!INSTRUCTOR_NAME.contains(instructor))
                     INSTRUCTOR_NAME.add(instructor);
             });
         } );
 
-    	for (Course c : v) {
+    	for (Course c : courses) {
     		String newline = c.getTitle() + "\n";
             Boolean counted = false;
             for(String instructor : c.getFilterInstructor())
