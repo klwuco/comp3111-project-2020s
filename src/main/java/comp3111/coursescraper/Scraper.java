@@ -155,6 +155,17 @@ public class Scraper {
 				}
 				c.setExclusion((exclusion == null ? "null" : exclusion.asText()));
 				
+				//try to collect information of is the course common core.
+				List<?> popupdetailslist_CC = (List<?>) htmlItem.getByXPath(".//div[@class='popupdetail']");
+				boolean IsCC = false;
+				for (HtmlElement e : (List<HtmlElement>)popupdetailslist_CC) {
+					if (e.asText().equals("CC for 4Y 2012 and after")) {
+						IsCC = true;
+					}
+				}	
+				c.setIsCC(IsCC);	
+				
+				
 				List<?> sections = (List<?>) htmlItem.getByXPath(".//tr[contains(@class,'newsect')]");
 				for ( HtmlElement e: (List<HtmlElement>)sections) {
 					String s = e.getChildNodes().get(1).asText();

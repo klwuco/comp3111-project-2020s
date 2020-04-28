@@ -210,10 +210,10 @@ public class Controller {
     		checkboxCC.setSelected(true);
     		checkboxNoEx.setSelected(true);
     		checkboxWLoT.setSelected(true);
-    		return;
+    
     	}
     	
-    	if(buttonSelectAll.getText().equals("De-select All")) {
+    	else if(buttonSelectAll.getText().equals("De-select All")) {
     		buttonSelectAll.setText("Select All");
     		checkboxAM.setSelected(false);
     		checkboxPM.setSelected(false);
@@ -226,11 +226,16 @@ public class Controller {
     		checkboxCC.setSelected(false);
     		checkboxNoEx.setSelected(false);
     		checkboxWLoT.setSelected(false);
-    		return;
+    		
     	}
     	
 	}
-
+    
+    @FXML
+    void filter() {
+    	textAreaConsole.clear();
+    	
+    }
 }
 
 	
