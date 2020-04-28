@@ -19,6 +19,10 @@ import javafx.scene.control.CheckBox;
 
 import java.util.Random;
 import java.util.List;
+import java.util.Vector;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 public class Controller {
 
     @FXML
@@ -127,14 +131,48 @@ public class Controller {
     @FXML
     void search() {
     	List<Course> v = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
+        int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
+
+        Vector<String> INSTRUCTOR_NAME = new Vector<String>();
+
+        v.forEach( c -> {
+            c.getInstructor().forEach( instructor -> {
+                if(!INSTRUCTOR_NAME.contains(instructor))
+                    INSTRUCTOR_NAME.add(instructor);
+            });
+        } );
+
     	for (Course c : v) {
     		String newline = c.getTitle() + "\n";
-    		for (int i = 0; i < c.getNumSlots(); i++) {
-    			Slot t = c.getSlot(i);
-    			newline += "Slot " + i + ":" + t + "\n";
+            Boolean counted = false;
+            for(String instructor : c.getFilterInstructor())
+                if(INSTRUCTOR_NAME.contains(instructor))
+                    INSTRUCTOR_NAME.remove(instructor);
+            Collections.sort(INSTRUCTOR_NAME);
+    		for (Section section : c.getSection()) {
+                if(section != null){
+                    if(!counted && section.getType() != null){
+                        counted = true;
+                        ++NUMBER_OF_COURSES;
+                    }
+                    ++NUMBER_OF_SECTIONS;
+                    int i = 0;
+                    for(Slot t : section.getSlot())
+                        if(t != null)
+                            newline += section + " Slot " + i++ + ":" + t + "\n";
+                }
     		}
     		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
     	}
+        String newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
+        newline += "Total Number of Course : " + Integer.toString(NUMBER_OF_COURSES) + "\n";
+        newline += "Instructors who has teaching assignment this term but does not need to teach at Tu 3:10pm : ";
+        
+        for(String instructor : INSTRUCTOR_NAME)
+            newline += instructor + ", ";
+        newline = newline.substring(0, newline.length() - 2);
+        newline += "\n";
+        textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
     	
     	//Add a random block on Saturday
     	AnchorPane ap = (AnchorPane)tabTimetable.getContent();

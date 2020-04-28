@@ -24,7 +24,23 @@ public class Section {
 		slots = new Slot[DEFAULT_MAX_SLOT];
 		for (int i = 0; i < DEFAULT_MAX_SLOT; i++) slots[i] = null;
 		numSlots = 0;
-	}
+    }
+    
+    public void setSectionID(String sectionID){
+        this.sectionID = sectionID;
+    }
+
+    public String getSectionID(){
+        return sectionID;
+    }
+
+    public void setSectionCode(String sectionCode){
+        this.sectionCode = sectionCode;
+    }
+
+    public String getSectionCode(){
+        return sectionCode;
+    }
 
 	public void addSlot(Slot slot){
 		if (numSlots >= DEFAULT_MAX_SLOT)
@@ -32,15 +48,21 @@ public class Section {
 		slots[numSlots++] = slot.clone();
 	}
 
-    public Slot getSlot(int i) {
-		if (i >= 0 && i < numSlots)
-			return slots[i];
-		return null;
-	}
+    public Slot[] getSlot() {
+        return slots;
+    }
+    
+    public Slot getSlot(int i){
+        return slots[i];
+    }
 
     public int getNumSlots() {
 		return numSlots;
 	}
+
+    public String getType() {
+        return type;
+    }
 
     public void setEnrollState(Boolean enroll){
         enrolled = enroll;
@@ -49,5 +71,10 @@ public class Section {
     public Boolean getEnrollState(){
         return enrolled;
     }
+
+    @Override
+    public String toString() {
+		return sectionCode + " (" + sectionID + ")";
+	}
 
 }

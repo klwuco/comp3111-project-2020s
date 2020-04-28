@@ -2,7 +2,7 @@
 > https://github.com/klwuco/comp3111-project-2020s.git
 
 ## 1. WU Ka Lok
-> email: klwuab| github: klwuab| dev branch: cousin_dev
+> email: klwuab| github: klwuco| dev branch: cousin_dev
 
 > Task 4 & Task 6
 
