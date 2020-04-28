@@ -15,8 +15,7 @@ import java.util.stream.Collectors;
 import java.time.LocalTime;
 
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType; 
-
+import javafx.scene.control.Alert.AlertType;
 
 /**
  * WebScraper provide a sample code that scrape web content. After it is constructed, you can call the method scrape with a keyword, 
@@ -88,6 +87,7 @@ public class Scraper {
 	 */
 	public Scraper() {
 		client = new WebClient();
+		client.getOptions().setPrintContentOnFailingStatusCode(false);
 		client.getOptions().setCssEnabled(false);
 		client.getOptions().setJavaScriptEnabled(false);
 	}
@@ -132,21 +132,20 @@ public class Scraper {
 		
 		try {
 			HtmlPage page = client.getPage(baseurl + "/" + term + "/");
+			String url[] = page.getBaseURL().getPath().split("/");
+			if(!url[url.length-1].equals(term)) throw new Exception();	
 			List<?> items = (List<?>) page.getByXPath("//div[@class='depts']");
 			Vector<String> result = new Vector<String>();
 			HtmlElement htmlItem = (HtmlElement) items.get(0);
 			List<?> subjectList = (List<?>) htmlItem.getByXPath(".//a");
-			client.close();
 			return ((List<HtmlElement>)subjectList).stream().map( e -> e.getChildNodes().get(0).asText()).toArray(String[]::new);
 		}		
 		catch (Exception e) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("Error Dialog");
-			alert.setHeaderText(null);
-			alert.setContentText("404 NOT FOUND! \n Please Check the Base URL and Term.");
-			alert.showAndWait();
+			return null;
 		}
-		return null;
+		finally{
+			client.close();
+		}
 
 	}
 
@@ -193,13 +192,12 @@ public class Scraper {
 			return result;
 
 		} catch (Exception e) {
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle("Error Dialog");
-			alert.setHeaderText(null);
-			alert.setContentText("404 NOT FOUND! \n Please Check the Base URL, Term and Subject.");
-			alert.showAndWait();
+			return null;
 		}
-		return null;
+		finally {
+			client.close();
+		}
+
 	}
 
 }
