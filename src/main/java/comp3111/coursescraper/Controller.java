@@ -1,6 +1,7 @@
 package comp3111.coursescraper;
 
 import java.awt.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -20,9 +21,12 @@ import java.util.Random;
 import java.util.List;
 import java.util.Vector;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 public class Controller {
+
+    private String[] subjects;
+
+    private Scraper scraper = new Scraper();
 
     @FXML
     private Tab tabMain;
@@ -71,13 +75,26 @@ public class Controller {
 
     @FXML
     private TextArea textAreaConsole;
-    
-    private Scraper scraper = new Scraper();
-    
-    private List<Course> courses;
+
     @FXML
     void allSubjectSearch() {
-    	
+        new Thread(() -> {
+            if(!subjectIsSearched()) return;
+            progressbar.setProgress(0);
+            final int ALL_SUBJECT_COUNT = subjects.length;
+            final double increment = 1.0 / ALL_SUBJECT_COUNT;
+            int counted_course = 0;
+            for (String subject : subjects) {
+                counted_course += searchCourse(subject);
+                System.out.println(subject + " is done");
+                Platform.runLater( () -> progressbar.setProgress(progressbar.getProgress() + increment) );
+                try {Thread.sleep(100);} catch (Exception e) {}
+            }
+            progressbar.setProgress(1);
+            String newline = "Total Number of Courses fetched:\n";
+            newline += Integer.toString(counted_course) + "\n";
+            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+        }).start();
     }
 
     @FXML
@@ -92,7 +109,49 @@ public class Controller {
 
     @FXML
     void search() {
-    	courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
+
+        new Thread(() -> {
+            subjectIsSearched();
+            searchCourse(textfieldSubject.getText());
+        }).start();
+
+    	//Add a random block on Saturday
+    	AnchorPane ap = (AnchorPane)tabTimetable.getContent();
+    	Label randomLabel = new Label("COMP1022\nL1");
+    	Random r = new Random();
+    	double start = (r.nextInt(10) + 1) * 20 + 40;
+
+    	randomLabel.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+    	randomLabel.setLayoutX(600.0);
+    	randomLabel.setLayoutY(start);
+    	randomLabel.setMinWidth(100.0);
+    	randomLabel.setMaxWidth(100.0);
+    	randomLabel.setMinHeight(60);
+    	randomLabel.setMaxHeight(60);
+    
+    	ap.getChildren().addAll(randomLabel);
+    	 	
+    	
+    }
+
+    private Boolean subjectIsSearched() {
+        if (subjects == null){
+            subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
+            int ALL_SUBJECT_COUNT = subjects.length;
+            String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(ALL_SUBJECT_COUNT) + "\n";
+            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+            return false;
+        }
+        else
+            return true;
+    }
+
+    private int searchCourse(String subject){
+        
+    	List<Course> courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(), subject);
+
+    	// courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
+
         int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
 
         Vector<String> INSTRUCTOR_NAME = new Vector<String>();
@@ -125,7 +184,9 @@ public class Controller {
                 }
     		}
     		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+            try {Thread.sleep(100);} catch (Exception e) {}
     	}
+
         String newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
         newline += "Total Number of Course : " + Integer.toString(NUMBER_OF_COURSES) + "\n";
         newline += "Instructors who has teaching assignment this term but does not need to teach at Tu 3:10pm : ";
@@ -134,26 +195,10 @@ public class Controller {
             newline += instructor + ", ";
         newline = newline.substring(0, newline.length() - 2);
         newline += "\n";
+        
         textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
-    	
-    	//Add a random block on Saturday
-    	AnchorPane ap = (AnchorPane)tabTimetable.getContent();
-    	Label randomLabel = new Label("COMP1022\nL1");
-    	Random r = new Random();
-    	double start = (r.nextInt(10) + 1) * 20 + 40;
 
-    	randomLabel.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-    	randomLabel.setLayoutX(600.0);
-    	randomLabel.setLayoutY(start);
-    	randomLabel.setMinWidth(100.0);
-    	randomLabel.setMaxWidth(100.0);
-    	randomLabel.setMinHeight(60);
-    	randomLabel.setMaxHeight(60);
-    
-    	ap.getChildren().addAll(randomLabel);
-    	
-    	
-    	
+        return courses.size();
     }
 
 }
