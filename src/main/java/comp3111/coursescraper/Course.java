@@ -46,6 +46,11 @@ public class Course {
 		this.title = title;
 	}
 
+	public String getCourseCode() {
+		String[] c = title.split(" ");
+		return c[0] + c[1];
+	}
+
 	/**
 	 * @return the description
 	 */

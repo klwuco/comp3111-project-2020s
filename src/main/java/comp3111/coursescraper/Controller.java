@@ -1,12 +1,16 @@
 package comp3111.coursescraper;
 
 import java.awt.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType; 
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Tab;
+
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
@@ -21,11 +25,25 @@ import java.util.Random;
 import java.util.List;
 import java.util.Vector;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 import java.time.LocalTime;
 
 public class Controller {
+
+    private String[] subjects;
+
+    private String[] consoleText = new String[TabLabel.values().length];
+
+    private Scraper scraper = new Scraper();
+
+    enum TabLabel {
+        Main,
+        BackEnd,
+        Filter,
+        Timetable,
+        AllSubject,
+        SFQ
+    }
 
     @FXML
     private Tab tabMain;
@@ -74,53 +92,74 @@ public class Controller {
 
     @FXML
     private TextArea textAreaConsole;
+//<<<<<<< ernest_dev
     
-    @FXML
-    private Button buttonSelectAll;
+//     @FXML
+//     private Button buttonSelectAll;
     
-    @FXML
-    private CheckBox checkboxAM;
+//     @FXML
+//     private CheckBox checkboxAM;
     
-    @FXML
-    private CheckBox checkboxPM;
+//     @FXML
+//     private CheckBox checkboxPM;
     
-    @FXML
-    private CheckBox checkboxMon;
+//     @FXML
+//     private CheckBox checkboxMon;
     
-    @FXML
-    private CheckBox checkboxTue;
+//     @FXML
+//     private CheckBox checkboxTue;
     
-    @FXML
-    private CheckBox checkboxWed;
+//     @FXML
+//     private CheckBox checkboxWed;
     
-    @FXML
-    private CheckBox checkboxThu;
+//     @FXML
+//     private CheckBox checkboxThu;
     
-    @FXML
-    private CheckBox checkboxFri;
+//     @FXML
+//     private CheckBox checkboxFri;
     
-    @FXML
-    private CheckBox checkboxSat;
+//     @FXML
+//     private CheckBox checkboxSat;
     
-    @FXML
-    private CheckBox checkboxCC;
+//     @FXML
+//     private CheckBox checkboxCC;
     
-    @FXML
-    private CheckBox checkboxNoEx;
+//     @FXML
+//     private CheckBox checkboxNoEx;
     
-    @FXML
-    private CheckBox checkboxWLoT;
+//     @FXML
+//     private CheckBox checkboxWLoT;
     
     
     
-    private Scraper scraper = new Scraper();
+//     private Scraper scraper = new Scraper();
     
-    private List<Course> courses;
-    LocalTime noon = LocalTime.parse("12:00:00");
+//     private List<Course> courses;
+//     LocalTime noon = LocalTime.parse("12:00:00");
     
+// =======
+
+// >>>>>>> master
     @FXML
     void allSubjectSearch() {
-    	
+        new Thread(() -> {
+            if(!subjectIsSearched(true)) return;
+            progressbar.setProgress(0);
+            final double increment = 1.0 / subjects.length;
+            int counted_course = 0;
+            for (String subject : subjects) {
+                counted_course += searchCourse(subject);
+                System.out.println(subject + " is done");
+                Platform.runLater( () -> progressbar.setProgress(progressbar.getProgress() + increment) );
+                try {Thread.sleep(100);} catch (Exception e) {}
+            }
+            progressbar.setProgress(1);
+
+            String newline = "Total Number of Courses fetched:\n";
+            newline += Integer.toString(counted_course) + "\n";
+            consoleText[TabLabel.AllSubject.ordinal()] = newline;
+            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+        }).start();
     }
 
     @FXML
@@ -135,50 +174,13 @@ public class Controller {
 
     @FXML
     void search() {
-    	courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(),textfieldSubject.getText());
-        int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
 
-        Vector<String> INSTRUCTOR_NAME = new Vector<String>();
+        new Thread(() -> {
+            subjectIsSearched(false);
+            if(subjects != null)
+                searchCourse(textfieldSubject.getText());
+        }).start();
 
-        courses.forEach( c -> {
-            c.getInstructor().forEach( instructor -> {
-                if(!INSTRUCTOR_NAME.contains(instructor))
-                    INSTRUCTOR_NAME.add(instructor);
-            });
-        } );
-
-    	for (Course c : courses) {
-    		String newline = c.getTitle() + "\n";
-            Boolean counted = false;
-            for(String instructor : c.getFilterInstructor())
-                if(INSTRUCTOR_NAME.contains(instructor))
-                    INSTRUCTOR_NAME.remove(instructor);
-            Collections.sort(INSTRUCTOR_NAME);
-    		for (Section section : c.getSection()) {
-                if(section != null){
-                    if(!counted && section.getType() != null){
-                        counted = true;
-                        ++NUMBER_OF_COURSES;
-                    }
-                    ++NUMBER_OF_SECTIONS;
-                    int i = 0;
-                    for(Slot t : section.getSlot())
-                        if(t != null)
-                            newline += section + " Slot " + i++ + ":" + t + "\n";
-                }
-    		}
-    		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
-    	}
-        String newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
-        newline += "Total Number of Course : " + Integer.toString(NUMBER_OF_COURSES) + "\n";
-        newline += "Instructors who has teaching assignment this term but does not need to teach at Tu 3:10pm : ";
-        
-        for(String instructor : INSTRUCTOR_NAME)
-            newline += instructor + ", ";
-        newline = newline.substring(0, newline.length() - 2);
-        newline += "\n";
-        textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
-    	
     	//Add a random block on Saturday
     	AnchorPane ap = (AnchorPane)tabTimetable.getContent();
     	Label randomLabel = new Label("COMP1022\nL1");
@@ -194,9 +196,101 @@ public class Controller {
     	randomLabel.setMaxHeight(60);
     
     	ap.getChildren().addAll(randomLabel);
+    	 	
     	
-    	
-    	
+    }
+
+    private Boolean subjectIsSearched(Boolean allSubject) {
+        if (subjects != null) return true;
+        
+        subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
+        if(subjects == null){
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL and Term.");
+                alert.showAndWait();
+            });
+            return false;
+        }
+
+        String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(subjects.length) + "\n";
+        consoleText[TabLabel.AllSubject.ordinal()] = newline;
+        if(allSubject)
+            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+        return false;
+        
+    }
+
+    private int searchCourse(String subject){
+        
+    	List<Course> courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(), subject);
+
+        if(courses == null) {
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL, Term and Subject.");
+                alert.showAndWait();
+            });
+            return 0;
+        }
+
+        int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
+
+        Vector<String> INSTRUCTOR_NAME = new Vector<String>();
+
+        courses.forEach( c -> {
+            c.getInstructor().forEach( instructor -> {
+                if(!INSTRUCTOR_NAME.contains(instructor))
+                    INSTRUCTOR_NAME.add(instructor);
+            });
+        } );
+
+    	for (Course c : courses) {
+            String courseTitle = c.getTitle() + "\n";
+    		String newline = new String();
+            Boolean counted = false;
+            for(String instructor : c.getFilterInstructor())
+                if(INSTRUCTOR_NAME.contains(instructor))
+                    INSTRUCTOR_NAME.remove(instructor);
+            Collections.sort(INSTRUCTOR_NAME);
+    		for (Section section : c.getSection()) {
+                if(section != null){
+                    if(!counted && section.getType() != null){
+                        counted = true;
+                        courseTitle += newline;
+                        newline = courseTitle;
+                        ++NUMBER_OF_COURSES;
+                    }
+                    ++NUMBER_OF_SECTIONS;
+                    int i = 0;
+                    for(Slot t : section.getSlot())
+                        if(t != null)
+                            newline += section + " Slot " + i++ + ":" + t + "\n";
+                }
+    		}
+            if(counted)
+    		    textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+            try {Thread.sleep(100);} catch (Exception e) {}
+    	}
+
+        String newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
+        newline += "Total Number of Course : " + Integer.toString(NUMBER_OF_COURSES) + "\n";
+        newline += "Instructors who has teaching assignment this term but does not need to teach at Tu 3:10pm : ";
+        
+        for(String instructor : INSTRUCTOR_NAME)
+            newline += instructor + ", ";
+        newline = newline.substring(0, newline.length() - 2);
+        newline += "\n";
+
+        consoleText[TabLabel.BackEnd.ordinal()] = newline;
+
+        consoleText[TabLabel.Main.ordinal()] = textAreaConsole.getText();
+
+        return courses.size();
     }
     
     @FXML
