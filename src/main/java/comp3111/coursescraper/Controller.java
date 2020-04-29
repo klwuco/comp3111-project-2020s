@@ -23,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.control.CheckBox;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
 import java.util.Vector;
@@ -34,11 +35,13 @@ public class Controller {
 
     private String[] subjects;
 
+    private List<Course> courses = new ArrayList<Course>();
+
     private String[] consoleText = initializeStringArray();
 
     private Scraper scraper = new Scraper();
   
-    LocalTime noon = LocalTime.parse("12:00:00");
+    private LocalTime noon = LocalTime.parse("12:00:00");
 
     enum TabLabel {
         Main,
@@ -203,111 +206,6 @@ public class Controller {
             textAreaConsole.setText(consoleText[tabPane.getSelectionModel().getSelectedIndex()])
         );
     }
-
-    private Boolean subjectIsSearched() {
-        if (subjects != null) return true;
-        
-        subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
-        if(subjects == null){
-            Platform.runLater( () -> {
-                final Alert alert = new Alert(AlertType.ERROR);
-                alert.setTitle("Error Dialog");
-                alert.setHeaderText(null);
-                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL and Term.");
-                alert.showAndWait();
-            });
-            return false;
-        }
-
-        String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(subjects.length) + "\n";
-        printTextInConsole(newline, TabLabel.AllSubject.ordinal());
-        
-        return false;
-        
-    }
-
-    private int searchCourse(String subject){
-        
-    	List<Course> courses = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(), subject);
-
-        if(courses == null) {
-            Platform.runLater( () -> {
-                final Alert alert = new Alert(AlertType.ERROR);
-                alert.setTitle("Error Dialog");
-                alert.setHeaderText(subject); // testing
-                // alert.setHeaderText(null);
-                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL, Term and Subject.");
-                alert.showAndWait();
-            });
-            return 0;
-        }
-
-        int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
-
-        Vector<String> INSTRUCTOR_NAME = new Vector<String>();
-
-        String newline = new String();
-
-        courses.forEach( c -> {
-            c.getInstructor().forEach( instructor -> {
-                if(!INSTRUCTOR_NAME.contains(instructor))
-                    INSTRUCTOR_NAME.add(instructor);
-            });
-        } );
-
-    	for (Course c : courses) {
-            String courseTitle = c.getTitle() + "\n";
-    		String courseInfo = new String();
-            Boolean counted = false;
-            for(String instructor : c.getFilterInstructor())
-                if(INSTRUCTOR_NAME.contains(instructor))
-                    INSTRUCTOR_NAME.remove(instructor);
-            Collections.sort(INSTRUCTOR_NAME);
-    		for (Section section : c.getSection()) {
-                if(section != null){
-                    if(!counted && section.getType() != null){
-                        counted = true;
-                        courseTitle += courseInfo;
-                        courseInfo = courseTitle;
-                        ++NUMBER_OF_COURSES;
-                    }
-                    ++NUMBER_OF_SECTIONS;
-                    int i = 0;
-
-                    if (section.getNumSlots() == 0){
-                        courseInfo += section + "\n";
-                        break;
-                    }
-
-                    for(Slot t : section.getSlot())
-                        if(t != null)
-                            courseInfo += section + " Slot " + i++ + ":" + t + "\n";
-                        else
-                            break;
-                }
-                else 
-                    break;
-    		}
-            if(counted){
-                courseInfo += "\n";
-                printTextInConsole(courseInfo, TabLabel.Main.ordinal());
-            }
-            try {Thread.sleep(100);} catch (Exception e) {}
-    	}
-
-        newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
-        newline += "Total Number of Course : " + Integer.toString(NUMBER_OF_COURSES) + "\n";
-        newline += "Instructors who has teaching assignment this term but does not need to teach at Tu 3:10pm : ";
-        
-        for(String instructor : INSTRUCTOR_NAME)
-            newline += instructor + ", ";
-        newline = newline.substring(0, newline.length() - 2);
-        newline += "\n" + "\n";
-
-        printTextInConsole(newline, TabLabel.BackEnd.ordinal());
-
-        return courses.size();
-    }
     
     @FXML
 	void SelectAll(){
@@ -463,6 +361,112 @@ public class Controller {
     		
     	}
     	
+    }
+
+    private Boolean subjectIsSearched() {
+        if (subjects != null) return true;
+        
+        subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
+        if(subjects == null){
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL and Term.");
+                alert.showAndWait();
+            });
+            return false;
+        }
+
+        String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(subjects.length) + "\n";
+        printTextInConsole(newline, TabLabel.AllSubject.ordinal());
+        
+        return false;
+        
+    }
+
+    private int searchCourse(String subject){
+        
+    	List<Course> courseList = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(), subject);
+
+        if(courseList == null) {
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText(subject); // testing
+                // alert.setHeaderText(null);
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL, Term and Subject.");
+                alert.showAndWait();
+            });
+            return 0;
+        }
+
+        int NUMBER_OF_SECTIONS = 0, NUMBER_OF_COURSES = 0;
+
+        Vector<String> INSTRUCTOR_NAME = new Vector<String>();
+
+        String newline = new String();
+
+        courseList.forEach( c -> {
+            c.getInstructor().forEach( instructor -> {
+                if(!INSTRUCTOR_NAME.contains(instructor))
+                    INSTRUCTOR_NAME.add(instructor);
+            });
+        } );
+
+    	for (Course c : courseList) {
+            String courseTitle = c.getTitle() + "\n";
+    		String courseInfo = new String();
+            Boolean counted = false;
+            for(String instructor : c.getFilterInstructor())
+                if(INSTRUCTOR_NAME.contains(instructor))
+                    INSTRUCTOR_NAME.remove(instructor);
+            Collections.sort(INSTRUCTOR_NAME);
+    		for (Section section : c.getSection()) {
+                if(section != null){
+                    if(!counted && section.getType() != null){
+                        counted = true;
+                        courseTitle += courseInfo;
+                        courseInfo = courseTitle;
+                        ++NUMBER_OF_COURSES;
+                        courses.add(c);
+                    }
+                    ++NUMBER_OF_SECTIONS;
+                    int i = 0;
+
+                    if (section.getNumSlots() == 0){
+                        courseInfo += section + "\n";
+                        break;
+                    }
+
+                    for(Slot t : section.getSlot())
+                        if(t != null)
+                            courseInfo += section + " Slot " + i++ + ":" + t + "\n";
+                        else
+                            break;
+                }
+                else 
+                    break;
+    		}
+            if(counted){
+                courseInfo += "\n";
+                printTextInConsole(courseInfo, TabLabel.Main.ordinal());
+            }
+            try {Thread.sleep(100);} catch (Exception e) {}
+    	}
+
+        newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
+        newline += "Total Number of Course : " + Integer.toString(NUMBER_OF_COURSES) + "\n";
+        newline += "Instructors who has teaching assignment this term but does not need to teach at Tu 3:10pm : ";
+        
+        for(String instructor : INSTRUCTOR_NAME)
+            newline += instructor + ", ";
+        newline = newline.substring(0, newline.length() - 2);
+        newline += "\n" + "\n";
+
+        printTextInConsole(newline, TabLabel.BackEnd.ordinal());
+
+        return courses.size();
     }
 
   
