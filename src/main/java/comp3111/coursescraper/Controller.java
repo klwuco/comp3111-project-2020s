@@ -23,6 +23,8 @@ import java.util.Vector;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+import java.time.LocalTime;
+
 public class Controller {
 
     @FXML
@@ -114,6 +116,8 @@ public class Controller {
     private Scraper scraper = new Scraper();
     
     private List<Course> courses;
+    LocalTime noon = LocalTime.parse("12:00:00");
+    
     @FXML
     void allSubjectSearch() {
     	
@@ -210,6 +214,7 @@ public class Controller {
     		checkboxCC.setSelected(true);
     		checkboxNoEx.setSelected(true);
     		checkboxWLoT.setSelected(true);
+    		filter();
     
     	}
     	
@@ -226,7 +231,7 @@ public class Controller {
     		checkboxCC.setSelected(false);
     		checkboxNoEx.setSelected(false);
     		checkboxWLoT.setSelected(false);
-    		
+    		filter();
     	}
     	
 	}
@@ -234,6 +239,119 @@ public class Controller {
     @FXML
     void filter() {
     	textAreaConsole.clear();
+    	for (Course c : courses) {
+   
+    		//String newline = c.getTitle() + "\n";
+    		//if the course is not CC and the cc box is checked, skip the course
+    		if(checkboxCC.isSelected()) {
+    			if(!c.getIsCC()) {
+    				continue;
+    			}
+    		}
+    		//if the NoEx is checked while the course have exclusions, skip the course
+    		if(checkboxNoEx.isSelected()) {
+    			if(!c.getExclusion().equals("null")) {
+    				continue;
+    			}
+    		}
+    		
+    		boolean isLoRT = true;
+    		if(checkboxWLoT.isSelected()) {isLoRT=false;}
+    		boolean isAM   = true;
+    		if(checkboxAM.isSelected()) {isAM=false;}
+    		boolean isPM   = true;
+    		if(checkboxPM.isSelected()) {isPM=false;}
+    		boolean isAMPM = true;
+    		if(checkboxAM.isSelected() && checkboxPM.isSelected()) {isAMPM=false;}
+    		boolean isMon  = true;
+    		if(checkboxMon.isSelected()) {isMon=false;}
+    		boolean isTue  = true;
+    		if(checkboxTue.isSelected()) {isTue=false;}
+    		boolean isWed  = true;
+    		if(checkboxWed.isSelected()) {isWed=false;}
+    		boolean isThu  = true;
+    		if(checkboxThu.isSelected()) {isThu=false;}
+    		boolean isFri  = true;
+    		if(checkboxFri.isSelected()) {isFri=false;}
+    		boolean isSat  = true;
+    		if(checkboxSat.isSelected()) {isSat=false;}
+    		for (Section section : c.getSection()) {
+                if(section != null){
+                	if(checkboxWLoT.isSelected() && !isLoRT) {
+                		if(section.getType()=="LAB"||section.getType()=="TUT") 
+                			isLoRT = true;
+                    }
+                    for(Slot t : section.getSlot()) {
+                    	if(t!=null) {
+                    		if(checkboxAM.isSelected() && !isAM) {
+                    			if(noon.compareTo(t.getStart())>0 && noon.compareTo(t.getEnd())>0) 
+                    				isAM=true;          			
+                    		}
+                    		if(checkboxPM.isSelected() && !isPM) {
+                    			if(noon.compareTo(t.getStart())<0 && noon.compareTo(t.getEnd())<0) 
+                    				isPM=true;          			
+                    		}
+                    		if(checkboxAM.isSelected() && checkboxPM.isSelected() && !isAMPM) {
+                    			if(isAM&&isPM || noon.compareTo(t.getStart())>0 && noon.compareTo(t.getEnd())<0)
+                    				isAMPM=true;
+                    				         			
+                    		}
+                    		if(checkboxMon.isSelected() && !isMon) {
+                    			if(t.getDay()==0)
+                    				isMon=true;
+                    		}
+                    		if(checkboxTue.isSelected() && !isTue) {
+                    			if(t.getDay()==1)
+                    				isTue=true;
+                    		}
+                    		if(checkboxWed.isSelected() && !isWed) {
+                    			if(t.getDay()==2)
+                    				isWed=true;
+                    		}
+                    		if(checkboxThu.isSelected() && !isThu) {
+                    			if(t.getDay()==3)
+                    				isThu=true;
+                    		}
+                    		if(checkboxFri.isSelected() && !isFri) {
+                    			if(t.getDay()==4)
+                    				isFri=true;
+                    		}
+                    		if(checkboxSat.isSelected() && !isSat) {
+                    			if(t.getDay()==5)
+                    				isSat=true;
+                    		}
+                    		
+                    		
+                    		
+                    		
+                    	}
+                    	
+                    }
+                	
+                	
+                         
+                    
+                }
+    		}
+    		
+    		
+    	
+    		if(!(isLoRT && isAM && isPM && isAMPM && isMon && isTue && isWed && isThu && isFri && isSat)) 
+    			continue;
+    		
+    		String newline = c.getTitle() + "\n";
+            
+    		for (Section section : c.getSection()) {
+                if(section != null){
+                    int i = 0;
+                    for(Slot t : section.getSlot())
+                        if(t != null)
+                            newline += section + " Slot " + i++ + ":" + t + "\n";
+                }
+    		}
+    		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+    		
+    	}
     	
     }
 }

@@ -164,7 +164,7 @@ public class Scraper {
 					}
 				}	
 				c.setIsCC(IsCC);	
-				
+				//cc collection done.
 				
 				List<?> sections = (List<?>) htmlItem.getByXPath(".//tr[contains(@class,'newsect')]");
 				for ( HtmlElement e: (List<HtmlElement>)sections) {

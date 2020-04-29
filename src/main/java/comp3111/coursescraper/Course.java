@@ -12,7 +12,7 @@ public class Course {
 	private Vector<String> targetInstructors;
 	private Section [] sections;
 	private int numSections;
-	private boolean isCC;
+	private boolean isCC;    //isCC is added with respective functions.
 	
 	public Course() {
 		sections = new Section[DEFAULT_MAX_SLOT];
