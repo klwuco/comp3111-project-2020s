@@ -12,6 +12,7 @@ public class Course {
 	private Vector<String> targetInstructors;
 	private Section [] sections;
 	private int numSections;
+	private boolean isCC;    //isCC is added with respective functions.
 	
 	public Course() {
 		sections = new Section[DEFAULT_MAX_SLOT];
@@ -101,5 +102,20 @@ public class Course {
 	public int getNumSections(){
 		return numSections;
 	}
+	
+	/**
+	 * @return is it CC
+	 */
+	public boolean getIsCC() {
+		return isCC;
+	}
+	
+	/**
+	 * @param exclusion the exclusion to set
+	 */
+	public void setIsCC(boolean isCC) {
+		this.isCC = isCC;
+	}
+	
 
 }
