@@ -2,6 +2,7 @@ package comp3111.coursescraper;
 
 import java.awt.event.ActionEvent;
 import javafx.application.Platform;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType; 
@@ -9,8 +10,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.Tab;
-
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
@@ -20,6 +21,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.List;
 import java.util.Vector;
@@ -29,7 +31,7 @@ public class Controller {
 
     private String[] subjects;
 
-    private String[] consoleText = new String[TabLabel.values().length];
+    private String[] consoleText = initializeStringArray();
 
     private Scraper scraper = new Scraper();
 
@@ -37,10 +39,14 @@ public class Controller {
         Main,
         BackEnd,
         Filter,
+        List,
         Timetable,
         AllSubject,
         SFQ
     }
+
+    @FXML
+    private TabPane tabPane;
 
     @FXML
     private Tab tabMain;
@@ -93,7 +99,7 @@ public class Controller {
     @FXML
     void allSubjectSearch() {
         new Thread(() -> {
-            if(!subjectIsSearched(true)) return;
+            if(!subjectIsSearched()) return;
             progressbar.setProgress(0);
             final double increment = 1.0 / subjects.length;
             int counted_course = 0;
@@ -105,10 +111,10 @@ public class Controller {
             }
             progressbar.setProgress(1);
 
-            String newline = "Total Number of Courses fetched:\n";
+            String newline = "Total Number of Courses fetched : ";
             newline += Integer.toString(counted_course) + "\n";
-            consoleText[TabLabel.AllSubject.ordinal()] = newline;
-            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+            printTextInConsole(newline, TabLabel.AllSubject.ordinal());
+            
         }).start();
     }
 
@@ -126,7 +132,7 @@ public class Controller {
     void search() {
 
         new Thread(() -> {
-            subjectIsSearched(false);
+            subjectIsSearched();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
         }).start();
@@ -150,7 +156,14 @@ public class Controller {
     	
     }
 
-    private Boolean subjectIsSearched(Boolean allSubject) {
+    @FXML
+    void onTabChange(){
+        Platform.runLater( () -> 
+            textAreaConsole.setText(consoleText[tabPane.getSelectionModel().getSelectedIndex()])
+        );
+    }
+
+    private Boolean subjectIsSearched() {
         if (subjects != null) return true;
         
         subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
@@ -166,9 +179,8 @@ public class Controller {
         }
 
         String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(subjects.length) + "\n";
-        consoleText[TabLabel.AllSubject.ordinal()] = newline;
-        if(allSubject)
-            textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+        printTextInConsole(newline, TabLabel.AllSubject.ordinal());
+        
         return false;
         
     }
@@ -181,7 +193,8 @@ public class Controller {
             Platform.runLater( () -> {
                 final Alert alert = new Alert(AlertType.ERROR);
                 alert.setTitle("Error Dialog");
-                alert.setHeaderText(null);
+                alert.setHeaderText(subject); // testing
+                // alert.setHeaderText(null);
                 alert.setContentText("404 NOT FOUND! \n Please Check the Base URL, Term and Subject.");
                 alert.showAndWait();
             });
@@ -192,6 +205,8 @@ public class Controller {
 
         Vector<String> INSTRUCTOR_NAME = new Vector<String>();
 
+        String newline = new String();
+
         courses.forEach( c -> {
             c.getInstructor().forEach( instructor -> {
                 if(!INSTRUCTOR_NAME.contains(instructor))
@@ -201,7 +216,7 @@ public class Controller {
 
     	for (Course c : courses) {
             String courseTitle = c.getTitle() + "\n";
-    		String newline = new String();
+    		String courseInfo = new String();
             Boolean counted = false;
             for(String instructor : c.getFilterInstructor())
                 if(INSTRUCTOR_NAME.contains(instructor))
@@ -211,36 +226,63 @@ public class Controller {
                 if(section != null){
                     if(!counted && section.getType() != null){
                         counted = true;
-                        courseTitle += newline;
-                        newline = courseTitle;
+                        courseTitle += courseInfo;
+                        courseInfo = courseTitle;
                         ++NUMBER_OF_COURSES;
                     }
                     ++NUMBER_OF_SECTIONS;
                     int i = 0;
+
+                    if (section.getNumSlots() == 0){
+                        courseInfo += section + "\n";
+                        break;
+                    }
+
                     for(Slot t : section.getSlot())
                         if(t != null)
-                            newline += section + " Slot " + i++ + ":" + t + "\n";
+                            courseInfo += section + " Slot " + i++ + ":" + t + "\n";
+                        else
+                            break;
                 }
+                else 
+                    break;
     		}
-            if(counted)
-    		    textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+            if(counted){
+                courseInfo += "\n";
+                printTextInConsole(courseInfo, TabLabel.Main.ordinal());
+            }
             try {Thread.sleep(100);} catch (Exception e) {}
     	}
 
-        String newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
+        newline = "Total Number of difference sections : " + Integer.toString(NUMBER_OF_SECTIONS) + "\n";
         newline += "Total Number of Course : " + Integer.toString(NUMBER_OF_COURSES) + "\n";
         newline += "Instructors who has teaching assignment this term but does not need to teach at Tu 3:10pm : ";
         
         for(String instructor : INSTRUCTOR_NAME)
             newline += instructor + ", ";
         newline = newline.substring(0, newline.length() - 2);
-        newline += "\n";
+        newline += "\n" + "\n";
 
-        consoleText[TabLabel.BackEnd.ordinal()] = newline;
-
-        consoleText[TabLabel.Main.ordinal()] = textAreaConsole.getText();
+        printTextInConsole(newline, TabLabel.BackEnd.ordinal());
 
         return courses.size();
+    }
+
+    private String[] initializeStringArray(){
+        String[] array = new String[TabLabel.values().length];
+        Arrays.fill(array, "");
+        return array;
+    }
+
+    private void printTextInConsole(String newline, int index){
+        final int MAX_LENGTH = 20000;
+        if(consoleText[index].length() > MAX_LENGTH) {
+            consoleText[index] = consoleText[index].substring(10000, consoleText[index].length());
+            consoleText[index] = consoleText[index].substring(consoleText[index].indexOf("\n"), consoleText[index].length());
+        }
+        consoleText[index] += newline;
+        if(tabPane.getSelectionModel().getSelectedIndex() == index)
+            Platform.runLater( () -> textAreaConsole.setText(consoleText[index]) );
     }
 
 }
