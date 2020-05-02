@@ -164,12 +164,40 @@ public class Controller {
 
     @FXML
     void findInstructorSfq() {
+    	try {
+    	List<Instructor> instructors = scraper.scrapeSFQInstructor(textfieldSfqUrl.getText());
+    	}catch(Exception e){
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Error");
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL.");
+                alert.showAndWait();
+            });
+    	}
     	buttonInstructorSfq.setDisable(true);
     }
 
     @FXML
-    void findSfqEnrollCourse() {
-
+    void findSfqEnrollCourse(){
+    	try {
+    		scraper.scrapeSFQ(textfieldSfqUrl.getText());
+    	} catch(Exception e) {
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Error");
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL.");
+                alert.showAndWait();
+            });
+    	}
+    	// While the enrolled function is not complete, use this
+    	List<Course> enrolled = getSearchCourse();
+    	for(Course course: enrolled) {
+    		double score = scraper.SFQLookUp(course);
+    		System.out.println("SFQ score for " + course.getCourseCode() + ": " + score);
+    	}
+    	
     }
 
     @FXML
