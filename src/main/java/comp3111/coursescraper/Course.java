@@ -111,7 +111,7 @@ public class Course {
 	}
 	
 	/**
-	 * @param exclusion the exclusion to set
+	 * @param isCC set is common core
 	 */
 	public void setIsCC(boolean isCC) {
 		this.isCC = isCC;

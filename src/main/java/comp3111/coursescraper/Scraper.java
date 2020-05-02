@@ -304,7 +304,11 @@ public class Scraper {
 		return !elem.asText().equals("  ");
 	}
 	
-
+	/**
+	 * Look up the SFQ score of a course. scrapeSFQ should be called first to populate the course record.
+	 * @param course The course to check the SFQ score
+	 * @return the (unadjusted) simple average of SFQ scores over all sections
+	 */
 	public double SFQLookUp(Course course){
 		if(_courseLookUpTable.isEmpty())
 			return Double.NaN;
@@ -314,6 +318,12 @@ public class Scraper {
 		return Double.NaN;
 	}
 
+	/**
+	 * Obtain the SFQ scores of all instructors
+	 * @param baseurl The base url of the SFQ website
+	 * @return A list of instructors scrapped from the SFQ site and their scores
+	 * @throws Exception
+	 */
 	public List<Instructor> scrapeSFQInstructor(String baseurl) throws Exception{
 		scrapeSFQ(baseurl);
 		return new ArrayList<Instructor>(_instructorSFQTable.values());
