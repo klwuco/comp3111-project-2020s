@@ -12,6 +12,8 @@ public class Section {
     private Boolean enrolled;
     private Slot[] slots;
     private int numSlots;
+    private String instructor;
+	
 	
 	public Section(String section) {
         sectionID = section.split(" ")[1];
@@ -76,5 +78,14 @@ public class Section {
     public String toString() {
 		return sectionCode + " (" + sectionID + ")";
 	}
+    //get the instructor in sections
+    public String getInstructor() {
+		return instructor;
+	}
+//set the instructor to sections
+	public void setInstructor(String instructor) {
+		this.instructor = instructor;
+	}
+
 
 }

@@ -19,7 +19,7 @@
   <children>
     <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="437.0" prefWidth="719.0">
       <children>
-            <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="350.0" prefWidth="719.0" tabClosingPolicy="UNAVAILABLE" onMouseClicked="#onTabChange">
+            <TabPane fx:id="tabPane" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" onMouseClicked="#onTabChange" prefHeight="350.0" prefWidth="719.0" tabClosingPolicy="UNAVAILABLE">
               <tabs>
                 <Tab fx:id="tabMain" text="Main">
                   <content>
@@ -79,13 +79,13 @@
                     <content>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="318.0" prefWidth="719.0">
                            <children>
-                              <TableView prefHeight="281.0" prefWidth="719.0">
+                              <TableView fx:id="tableView" prefHeight="281.0" prefWidth="719.0">
                                 <columns>
-                                  <TableColumn prefWidth="91.0" text="Course Code" />
-                                    <TableColumn prefWidth="108.0" text="Section" />
-                                  <TableColumn prefWidth="271.0" text="Course Name" />
-                                    <TableColumn prefWidth="152.0" text="Instructor" />
-                                    <TableColumn prefWidth="96.0" text="Enroll" />
+                                  <TableColumn fx:id="courseCode" editable="false" prefWidth="91.0" text="Course Code" />
+                                    <TableColumn fx:id="section" editable="false" prefWidth="108.0" text="Section" />
+                                  <TableColumn fx:id="courseName" editable="false" prefWidth="271.0" text="Course Name" />
+                                    <TableColumn fx:id="instructor" editable="false" prefWidth="152.0" text="Instructor" />
+                                    <TableColumn fx:id="enroll" editable="false" prefWidth="96.0" text="Enroll" />
                                 </columns>
                               </TableView>
                               <Label layoutX="22.0" layoutY="281.0" text="*Fill the table according to the result of the Filter. If the Filter cannot be correctly implemented, show all result scrapped." />
