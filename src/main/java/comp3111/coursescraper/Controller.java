@@ -159,6 +159,7 @@ public class Controller {
             newline += Integer.toString(counted_course) + "\n";
             printTextInConsole(newline, TabLabel.AllSubject.ordinal());
             
+            enableSFQInstructorButton();
         }).start();
     }
 
@@ -175,7 +176,6 @@ public class Controller {
                 alert.showAndWait();
             });
     	}
-    	buttonInstructorSfq.setDisable(true);
     }
 
     @FXML
@@ -207,6 +207,7 @@ public class Controller {
             subjectIsSearched();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
+            enableSFQInstructorButton();
         }).start();
 
     	//Add a random block on Saturday
@@ -513,6 +514,27 @@ public class Controller {
         consoleText[index] += newline;
         if(tabPane.getSelectionModel().getSelectedIndex() == index)
             Platform.runLater( () -> textAreaConsole.setText(consoleText[index]) );
+    }
+    void enableSFQInstructorButton() {
+    	Platform.runLater(()-> buttonSfqEnrollCourse.setDisable(false));
+    }
+    
+    private List<Course> getSearchCourse(){
+    	// Simulate select course
+    	List<Course> enrolled = new ArrayList<Course>();
+    	int count = 0;
+    	while(true) {
+    		Course course = courses.get(count);
+    		for(Section section: course.getSection()) {
+    			if(section == null)
+    				break;
+    			enrolled.add(course);
+    			break;
+    		}
+			if(++count >= 15) 
+				break;
+    	}
+    	return enrolled;
     }
 }
 
