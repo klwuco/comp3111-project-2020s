@@ -1,6 +1,8 @@
 package comp3111.coursescraper;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -215,5 +217,112 @@ public class Scraper {
 		}
 
 	}
+	
+	private HashMap<String, Double> _courseLookUpTable = new HashMap<String, Double>();
+	private HashMap<String, Instructor> _instructorSFQTable = new HashMap<String, Instructor>();
+	
+	public void scrapeSFQ(String baseurl) throws Exception {
+		baseurl = "file:///C:\\Users\\xdlok\\Documents\\GitHub\\comp3111-project-2020s\\src\\main\\resources\\sfq.html";
+		// Reset tables
+		_courseLookUpTable = new HashMap<String, Double>();
+		_instructorSFQTable = new HashMap<String, Instructor> ();
+		try {
+			HtmlPage page = client.getPage(baseurl);
+			List<?> tables = (List<?>) page.getByXPath("//table");
+			// The first two and the last tables are junk
+			List<?> subjects = tables.subList(2, tables.size()-1);
+			for(HtmlElement subject: (List<HtmlElement>) subjects) {
+				scrapeSFQSubject(subject);
+			}
+		} catch(Exception e) {
+			throw e;
+		}finally {
+			client.close();
+		}
+	}
+	
+	private void scrapeSFQSubject(HtmlElement subject) {
+		// Initialize
+		String currentCourse = null;
+		double currentSum = 0d;
+		int numSection = 0;
+		List<?> tableEntry = (List<?>) subject.getByXPath(".//tr");
+		// Get rid of the head and the tail (with Department Overall)
+		tableEntry = tableEntry.subList(1, tableEntry.size()-1);
+		for(HtmlElement tr: (List<HtmlElement>) tableEntry) {
+			//System.out.println(tr.asXml());
+			List<?> td = (List<?>) tr.getByXPath(".//td");
+			if(isNewCourse(td)) {
+				// Add entry to table
+				if(currentCourse != null) {
+					double average = currentSum / numSection;
+					_courseLookUpTable.put(currentCourse, average);
+				}
+				
+				// Sets new course, and remove white space
+				// e.g. COMP 1021 becomes COMP1021
+				currentCourse = ((HtmlElement) td.get(0)).asText().replaceAll("\\s+","");
+				// Reset sum
+				currentSum = 0d;
+				numSection = 0;
+			}else if(isSession(td)) {
+				// Get SFQ score
+				String SFQBlock = ((HtmlElement) td.get(3)).asText();
+				String sectionScore = SFQBlock.split("\\(")[0];
+				// If the score is not -, update sum and num sesction counted
+				if(!sectionScore.equals("-")) {
+					double score = Double.parseDouble(sectionScore);
+					currentSum += score;
+					numSection++;
+				}
+			}else if(isInstructor(td)) { // Instructor column
+				String instructorName = ((HtmlElement) td.get(2)).asText();
+				// Grab instructor entry, or create one of not yet created
+				_instructorSFQTable.putIfAbsent(instructorName, new Instructor(instructorName));
+				Instructor instructor = _instructorSFQTable.get(instructorName);
+				// Get SFQ score
+				String SFQBlock = ((HtmlElement) td.get(4)).asText();
+				String instructorScore = SFQBlock.split("\\(")[0];
+				// If the score is not -, update instructor score and put it back
+				if(!instructorScore.equals("-")) {
+					double score = Double.parseDouble(instructorScore);
+					instructor.addScore(score);
+					}
+				_instructorSFQTable.replace(instructorName, instructor);
+			} // Else, empty instructor name, do nothing
+		}
+	}
+	
+	private boolean isNewCourse(List<?> entry) {
+		HtmlElement firstEntry = (HtmlElement) entry.get(0);
+		String colspan = firstEntry.getAttribute("colspan");
+		return colspan.equals("3");
+	}
+	
+	private boolean isSession(List<?> entry) {
+		HtmlElement elem = (HtmlElement) entry.get(1);
+		return !elem.asText().equals(" ");
+	}
+	
+	private boolean isInstructor(List<?> entry) {
+		HtmlElement elem = (HtmlElement) entry.get(2);
+		return !elem.asText().equals("  ");
+	}
+	
 
+	public double SFQLookUp(Course course){
+		if(_courseLookUpTable.isEmpty())
+			return Double.NaN;
+		if(_courseLookUpTable.containsKey(course.getCourseCode())) {
+			return _courseLookUpTable.get(course.getCourseCode());
+			}
+		return Double.NaN;
+	}
+
+	public List<Instructor> scrapeSFQInstructor(String baseurl) throws Exception{
+		scrapeSFQ(baseurl);
+		return new ArrayList<Instructor>(_instructorSFQTable.values());
+	}
+	
+	
 }

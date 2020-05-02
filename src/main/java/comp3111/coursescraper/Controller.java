@@ -1,6 +1,8 @@
 package comp3111.coursescraper;
 
 import java.awt.event.ActionEvent;
+import java.time.LocalTime;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,17 +29,18 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.control.CheckBox;
 
 
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
 import java.util.Collections;
 
-import java.time.LocalTime;
 
 public class Controller {
 
@@ -117,6 +120,10 @@ public class Controller {
 
     @FXML
     private TextArea textAreaConsole;
+    
+    private HashSet<Color> timetableColors = new HashSet<Color>();
+    
+	
     
     @FXML
     private Button buttonSelectAll;
@@ -222,6 +229,7 @@ public class Controller {
             progressbar.setProgress(0);
             final double increment = 1.0 / subjects.length;
             int counted_course = 0;
+            courses = new Vector<Course>();
             for (String subject : subjects) {
                 counted_course += searchCourse(subject);
                 System.out.println(subject + " is done");
@@ -233,18 +241,60 @@ public class Controller {
             String newline = "Total Number of Courses fetched : ";
             newline += Integer.toString(counted_course) + "\n";
             printTextInConsole(newline, TabLabel.AllSubject.ordinal());
-            
+            // Temp Logic to update timetable when search is performed
+            Platform.runLater(() -> {renderTimeTable();});
+            enableSFQInstructorButton();
         }).start();
     }
+   
 
     @FXML
     void findInstructorSfq() {
-    	buttonInstructorSfq.setDisable(true);
+    	List<Instructor> instructors;
+    	try {
+    	instructors = scraper.scrapeSFQInstructor(textfieldSfqUrl.getText());
+    	}catch(Exception e){
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Error");
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL.");
+                alert.showAndWait();
+            });
+            return;
+    	}
+    	String texts = "The (unadjusted) SFQ score for instructors:\n";
+    	for(Instructor instructor: instructors) {
+    		double score = instructor.getAverage();
+    		texts += String.format("%s: %.2f\n", instructor.getName(), score);
+    	}
+    	consoleText[TabLabel.SFQ.ordinal()] = "";
+    	printTextInConsole(texts, TabLabel.SFQ.ordinal());
     }
 
     @FXML
-    void findSfqEnrollCourse() {
-
+    void findSfqEnrollCourse(){
+    	try {
+    		scraper.scrapeSFQ(textfieldSfqUrl.getText());
+    	} catch(Exception e) {
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Error");
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL.");
+                alert.showAndWait();
+            });
+    	}
+    	// While the enrolled function is not complete, use this
+    	List<Course> enrolled = getSearchCourse();
+    	String texts = "The (unadjusted) SFQ score for your enrolled course(s):\n";
+    	for(Course course: enrolled) {
+    		double score = scraper.SFQLookUp(course);
+    		texts += String.format("%s: %.2f\n", course.getCourseCode(), score);
+    	}
+    	consoleText[TabLabel.SFQ.ordinal()] = "";
+    	printTextInConsole(texts, TabLabel.SFQ.ordinal());
+    	
     }
 
     @FXML
@@ -252,26 +302,13 @@ public class Controller {
 
         new Thread(() -> {
             subjectIsSearched();
+            courses = new Vector<Course>();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
+            // Temp Logic to update timetable when search is performed
+            Platform.runLater(() -> {renderTimeTable();});
+            enableSFQInstructorButton();
         }).start();
-
-    	//Add a random block on Saturday
-    	AnchorPane ap = (AnchorPane)tabTimetable.getContent();
-    	Label randomLabel = new Label("COMP1022\nL1");
-    	Random r = new Random();
-    	double start = (r.nextInt(10) + 1) * 20 + 40;
-
-    	randomLabel.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-    	randomLabel.setLayoutX(600.0);
-    	randomLabel.setLayoutY(start);
-    	randomLabel.setMinWidth(100.0);
-    	randomLabel.setMaxWidth(100.0);
-    	randomLabel.setMinHeight(60);
-    	randomLabel.setMaxHeight(60);
-    
-    	ap.getChildren().addAll(randomLabel);
-    	 	
     	
     }
 
@@ -654,6 +691,53 @@ public class Controller {
 
         return courses.size();
     }
+    
+	private void renderTimeTable() {
+		// While the enrolled function is not complete, use this
+    	List<Course> enrolled = getSearchCourse();
+    	for(Course course: enrolled) {
+    		renderSession(course.getCourseCode(), course.getSection()[0]);
+    	}
+    }
+    
+    private void renderSession(String course_code, Section section) {
+    	final float LABEL_WIDTH = 100.0f;
+    	AnchorPane ap = (AnchorPane)tabTimetable.getContent();
+    	String sectionName = section.getSectionCode();
+    	String labelText = course_code + '\n' + sectionName;
+    	Slot slots[] = section.getSlot();
+    	Color color = randomColor();
+    	for(Slot slot: slots) {
+    		if(slot == null)
+    			break;
+	    	Label label = new Label(labelText);
+	    	label.setFont(new Font(10));
+	    	label.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, Insets.EMPTY)));
+	    	label.setLayoutX((slot.getDay() + 1) * LABEL_WIDTH);
+	    	label.setLayoutY(timeToLabelYPos(slot.getStartHour(),slot.getStartMinute()));
+	    	label.setMinWidth(LABEL_WIDTH);
+	    	label.setMaxWidth(LABEL_WIDTH);
+	    	int minute = slot.getDuration();
+	    	float height = minute/2.0f;
+	    	label.setMinHeight(height);
+	    	label.setMaxHeight(height);
+	    	ap.getChildren().add(label);
+    	}
+    }
+    
+    private Color randomColor() {
+    	final float alpha = 0.5f;
+    	Random r = new Random();
+    	Color c;
+    	do {
+        	float red = r.nextFloat() / 2 + 0.5f;
+        	float green = r.nextFloat() / 2 + 0.5f;
+        	float blue = r.nextFloat() / 2 + 0.5f;
+        	c = new Color(red, green, blue, alpha);
+    	} while (timetableColors.contains(c));
+    	timetableColors.add(c);
+    	return c;
+    }
 
   
     private String[] initializeStringArray(){
@@ -672,9 +756,37 @@ public class Controller {
         if(tabPane.getSelectionModel().getSelectedIndex() == index)
             Platform.runLater( () -> textAreaConsole.setText(consoleText[index]) );
     }
+
+    private float timeToLabelYPos(int hour, int minute) {
+    	final float offset = 40.f;
+    	final int classStartTime = 9;
+    	float fractionHour = minute / 60.0f; // Turn minute to fractions of hours
+    	float pos = (hour + fractionHour - classStartTime) * 20.0f + offset;
+    	return pos;
+    }
     
+    void enableSFQInstructorButton() {
+    	Platform.runLater(()-> buttonSfqEnrollCourse.setDisable(false));
+    }
     
- 
+    private List<Course> getSearchCourse(){
+    	// Simulate select course
+    	List<Course> enrolled = new ArrayList<Course>();
+    	int count = 0;
+    	while(true) {
+    		Course course = courses.get(count);
+    		for(Section section: course.getSection()) {
+    			if(section == null)
+    				break;
+    			enrolled.add(course);
+    			break;
+    		}
+			if(++count >= 5) 
+				break;
+    	}
+    	return enrolled;
+    }
+
 }
 
 	
