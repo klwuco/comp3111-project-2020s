@@ -2,7 +2,8 @@ package comp3111.coursescraper;
 
 import java.awt.event.ActionEvent;
 import javafx.application.Platform;
-
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType; 
@@ -11,8 +12,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
@@ -21,6 +26,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.geometry.Insets;
 import javafx.scene.paint.Color;
 import javafx.scene.control.CheckBox;
+
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -40,6 +46,8 @@ public class Controller {
     private String[] consoleText = initializeStringArray();
 
     private Scraper scraper = new Scraper();
+    
+    private List<FList> fList = new ArrayList<FList>();
   
     private LocalTime noon = LocalTime.parse("12:00:00");
 
@@ -139,6 +147,71 @@ public class Controller {
     
     @FXML
     private CheckBox checkboxWLoT;
+    
+    @FXML
+    private TableView<FList> tableView;
+    
+    @FXML
+    private TableColumn<FList,String> courseCode;
+    
+    @FXML
+    private TableColumn<FList, String> section;
+    
+    @FXML
+    private TableColumn<FList, String> courseName;
+    
+    @FXML
+    private TableColumn<FList, String> instructor;
+    
+    @FXML
+    private TableColumn<FList, CheckBox> enroll;
+    
+    
+    @FXML
+    public void initialize() {
+    	courseCode.setCellValueFactory(new PropertyValueFactory<FList,String>("courseCode"));
+    	section.setCellValueFactory(new PropertyValueFactory<FList,String>("section"));
+    	courseName.setCellValueFactory(new PropertyValueFactory<FList,String>("courseName"));
+    	instructor.setCellValueFactory(new PropertyValueFactory<FList,String>("instructor"));
+    	enroll.setCellValueFactory(new PropertyValueFactory<FList,CheckBox>("enroll"));
+    	
+    	//edit table column state, also done in ui.fxml
+    	tableView.setEditable(false);
+    	courseCode.setEditable(false);
+    	section.setEditable(false);
+    	courseName.setEditable(false);
+    	instructor.setEditable(false);
+    	
+    	
+//    	System.out.print(tableView.isEditable());
+//    	System.out.print(courseCode.isEditable());
+//    	System.out.print(section.isEditable());
+//    	System.out.print(courseName.isEditable());
+//    	System.out.print(instructor.isEditable());
+//    	System.out.print(enroll.isEditable());
+    	
+    	tableView.setItems(getList());
+    	//tableView.getItems().add(getList());
+    }
+    
+    public ObservableList<FList> getList(){
+    	ObservableList<FList> filteredList= FXCollections.observableArrayList();
+    	
+//    	if (!fList.isEmpty()) {
+//    		for(int i = 0; i < fList.size() ; ++i) {
+//    			filteredList.add(fList.get(i));
+//    		}	
+//    	}
+    	
+//    	filteredList.add(new FList("ABC123","L1","Happy","Me"));
+//    	filteredList.add(new FList("ABC234","L2","Sad","He"));
+    	
+    	return filteredList;
+    	
+    	
+    }
+    
+    
     
     @FXML
     void allSubjectSearch() {
@@ -247,6 +320,13 @@ public class Controller {
     @FXML
     void filter() {
     	textAreaConsole.clear();
+    	
+    	//for ( int i = 0; i<tableView.getItems().size(); i++) {
+    	    tableView.getItems().clear();
+    	//}
+    	
+    	fList.clear();
+    	
     	for (Course c : courses) {
    
     		//String newline = c.getTitle() + "\n";
@@ -348,19 +428,32 @@ public class Controller {
     			continue;
     		
     		String newline = c.getTitle() + "\n";
+    		
             
     		for (Section section : c.getSection()) {
                 if(section != null){
                     int i = 0;
                     for(Slot t : section.getSlot())
                         if(t != null)
+                        	
                             newline += section + " Slot " + i++ + ":" + t + "\n";
+                    fList.add(new FList(c.getCourseCode(),section.getSectionCode(),c.getTitle(),section.getInstructor()));
                 }
     		}
     		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
     		
     	}
+//    	for(int i = 0; i < fList.size();++i) {
+//    		System.out.print(fList.get(i).getCourseCode()+"  " + fList.get(i).getSection()+ " " +fList.get(i).getCourseName()+ "  "+fList.get(i).getInstructor());
+//    		System.out.print("\n");
+//    	}
+    	if (!fList.isEmpty()) {
+    		for(int i = 0; i < fList.size() ; ++i) {
+    			tableView.getItems().add(fList.get(i));
+    		}	
+    	}
     	
+    	//tableView.refresh();
     }
 
     private Boolean subjectIsSearched() {

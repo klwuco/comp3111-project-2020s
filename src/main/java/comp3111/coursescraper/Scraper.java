@@ -97,11 +97,16 @@ public class Scraper {
 		String times[] =  date_times[date_times.length-1].split(" ");
 		String venue = e.getChildNodes().get(secondRow ? 1 : 4).asText();
 		String instructors = e.getChildNodes().get(secondRow ? 2 : 5).asText();
+		//add instructor to sections
+		String instructorString = new String();
 		
-		if(instructors != null && !instructors.equals("TBA"))
-			for(String instructor : instructors.split("\n"))
+		if(instructors != null && !instructors.equals("TBA")) {
+			for(String instructor : instructors.split("\n")) {
 				c.addInstructor(instructor);
-
+				instructorString += instructor;
+			}
+			section.setInstructor(instructorString);
+		}
 		if (times[0].equals("TBA"))
 			return;
 
