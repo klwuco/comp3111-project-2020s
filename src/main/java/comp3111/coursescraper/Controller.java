@@ -159,17 +159,57 @@ public class Controller {
             newline += Integer.toString(counted_course) + "\n";
             printTextInConsole(newline, TabLabel.AllSubject.ordinal());
             
+            enableSFQInstructorButton();
         }).start();
     }
 
     @FXML
     void findInstructorSfq() {
-    	buttonInstructorSfq.setDisable(true);
+    	List<Instructor> instructors;
+    	try {
+    	instructors = scraper.scrapeSFQInstructor(textfieldSfqUrl.getText());
+    	}catch(Exception e){
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Error");
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL.");
+                alert.showAndWait();
+            });
+            return;
+    	}
+    	String texts = "The (unadjusted) SFQ score for instructors:\n";
+    	for(Instructor instructor: instructors) {
+    		double score = instructor.getAverage();
+    		texts += String.format("%s: %.2f\n", instructor.getName(), score);
+    	}
+    	consoleText[TabLabel.SFQ.ordinal()] = "";
+    	printTextInConsole(texts, TabLabel.SFQ.ordinal());
     }
 
     @FXML
-    void findSfqEnrollCourse() {
-
+    void findSfqEnrollCourse(){
+    	try {
+    		scraper.scrapeSFQ(textfieldSfqUrl.getText());
+    	} catch(Exception e) {
+            Platform.runLater( () -> {
+                final Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error Dialog");
+                alert.setHeaderText("Error");
+                alert.setContentText("404 NOT FOUND! \n Please Check the Base URL.");
+                alert.showAndWait();
+            });
+    	}
+    	// While the enrolled function is not complete, use this
+    	List<Course> enrolled = getSearchCourse();
+    	String texts = "The (unadjusted) SFQ score for your enrolled course(s):\n";
+    	for(Course course: enrolled) {
+    		double score = scraper.SFQLookUp(course);
+    		texts += String.format("%s: %.2f\n", course.getCourseCode(), score);
+    	}
+    	consoleText[TabLabel.SFQ.ordinal()] = "";
+    	printTextInConsole(texts, TabLabel.SFQ.ordinal());
+    	
     }
 
     @FXML
@@ -179,6 +219,7 @@ public class Controller {
             subjectIsSearched();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
+            enableSFQInstructorButton();
         }).start();
 
     	//Add a random block on Saturday
@@ -485,6 +526,27 @@ public class Controller {
         consoleText[index] += newline;
         if(tabPane.getSelectionModel().getSelectedIndex() == index)
             Platform.runLater( () -> textAreaConsole.setText(consoleText[index]) );
+    }
+    void enableSFQInstructorButton() {
+    	Platform.runLater(()-> buttonSfqEnrollCourse.setDisable(false));
+    }
+    
+    private List<Course> getSearchCourse(){
+    	// Simulate select course
+    	List<Course> enrolled = new ArrayList<Course>();
+    	int count = 0;
+    	while(true) {
+    		Course course = courses.get(count);
+    		for(Section section: course.getSection()) {
+    			if(section == null)
+    				break;
+    			enrolled.add(course);
+    			break;
+    		}
+			if(++count >= 5) 
+				break;
+    	}
+    	return enrolled;
     }
 }
 
