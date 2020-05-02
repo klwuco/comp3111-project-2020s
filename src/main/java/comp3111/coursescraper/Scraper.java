@@ -296,8 +296,13 @@ public class Scraper {
 	}
 	
 	private boolean isSession(List<?> entry) {
-		HtmlElement secondEntry = (HtmlElement) entry.get(1);
-		return !secondEntry.asText().equals(" ");
+		HtmlElement elem = (HtmlElement) entry.get(1);
+		return !elem.asText().equals(" ");
+	}
+	
+	private boolean isInstructor(List<?> entry) {
+		HtmlElement elem = (HtmlElement) entry.get(2);
+		return !elem.asText().equals("  ");
 	}
 	
 
