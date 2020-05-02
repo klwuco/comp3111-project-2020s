@@ -227,6 +227,7 @@ public class Controller {
 
         new Thread(() -> {
             subjectIsSearched();
+            courses = new Vector<Course>();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
             // Temp Logic to update timetable when search is performed
