@@ -240,7 +240,7 @@ public class Scraper {
 		// Initialize
 		String currentCourse = null;
 		double currentSum = 0d;
-		int numSession = 0;
+		int numSection = 0;
 		List<?> tableEntry = (List<?>) subject.getByXPath(".//tr");
 		// Get rid of the head and the tail (with Department Overall)
 		tableEntry = tableEntry.subList(1, tableEntry.size()-1);
@@ -250,7 +250,7 @@ public class Scraper {
 			if(isNewCourse(td)) {
 				// Add entry to table
 				if(currentCourse != null) {
-					double average = currentSum / numSession;
+					double average = currentSum / numSection;
 					_courseLookUpTable.put(currentCourse, average);
 				}
 				
@@ -259,18 +259,20 @@ public class Scraper {
 				currentCourse = ((HtmlElement) td.get(0)).asText().replaceAll("\\s+","");
 				// Reset sum
 				currentSum = 0d;
-				numSession = 0;
+				numSection = 0;
 			}else if(isSession(td)) {
-				//System.out.println(((HtmlElement) td.get(1)).asText());
+				// Get SFQ score
 				String SFQBlock = ((HtmlElement) td.get(3)).asText();
-				String sessionScore = SFQBlock.split("\\(")[0];
-				if(!sessionScore.equals("-")) {
-					double score = Double.parseDouble(sessionScore);
+				String sectionScore = SFQBlock.split("\\(")[0];
+				// If the score is not -, update sum and num sesction counted
+				if(!sectionScore.equals("-")) {
+					double score = Double.parseDouble(sectionScore);
 					currentSum += score;
-					numSession++;
+					numSection++;
 				}
-			}else { // Instructor column
+			}else if(isInstructor(td)) { // Instructor column
 				String instructorName = ((HtmlElement) td.get(2)).asText();
+				System.out.println(instructorName);
 				// Grab instructor entry, or create one of not yet created
 				_instructorSFQTable.putIfAbsent(instructorName, new Instructor(instructorName));
 				Instructor instructor = _instructorSFQTable.get(instructorName);
@@ -283,7 +285,7 @@ public class Scraper {
 					instructor.addScore(score);
 					}
 				_instructorSFQTable.replace(instructorName, instructor);
-			}
+			} // Else, empty instructor name, do nothing
 		}
 	}
 	
