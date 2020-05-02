@@ -1,8 +1,12 @@
 package comp3111.coursescraper;
 
-
+//This FList class is used for tableView
+//the attributes are respective to the table columns 
+//Course code, Section, Course Name, Instructor and Enroll respectively
+//The enroll is in checkbox type.
 
 import javafx.beans.property.SimpleStringProperty;
+
 import javafx.scene.control.CheckBox;
 
 public class FList {
@@ -10,6 +14,7 @@ public class FList {
 	private SimpleStringProperty courseCode, section,courseName, instructor;
 	
 	CheckBox enroll;
+	
 	
 	
 
@@ -22,6 +27,7 @@ public class FList {
 		this.instructor = new SimpleStringProperty(instructor);
 		CheckBox enroll = new CheckBox();
 		this.enroll = enroll;
+		
 	}
 	
 	public FList(FList _flist) {
@@ -33,9 +39,6 @@ public class FList {
 		 
 	}
 
-	
-
-	
 
 	public String getCourseCode() {
 		return courseCode.get();
@@ -73,10 +76,8 @@ public class FList {
 		return enroll;
 	}
 
-	public void setEnroll(CheckBox enroll) {
+	public void setEnrollBox(CheckBox enroll) {
 		this.enroll = enroll;
 	}
-	
-	
 	
 }
