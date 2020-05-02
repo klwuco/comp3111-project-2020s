@@ -165,8 +165,9 @@ public class Controller {
 
     @FXML
     void findInstructorSfq() {
+    	List<Instructor> instructors;
     	try {
-    	List<Instructor> instructors = scraper.scrapeSFQInstructor(textfieldSfqUrl.getText());
+    	instructors = scraper.scrapeSFQInstructor(textfieldSfqUrl.getText());
     	}catch(Exception e){
             Platform.runLater( () -> {
                 final Alert alert = new Alert(AlertType.ERROR);
@@ -175,7 +176,15 @@ public class Controller {
                 alert.setContentText("404 NOT FOUND! \n Please Check the Base URL.");
                 alert.showAndWait();
             });
+            return;
     	}
+    	String texts = "The (unadjusted) SFQ score for instructors:\n";
+    	for(Instructor instructor: instructors) {
+    		double score = instructor.getAverage();
+    		texts += String.format("%s: %.2f\n", instructor.getName(), score);
+    	}
+    	consoleText[TabLabel.SFQ.ordinal()] = "";
+    	printTextInConsole(texts, TabLabel.SFQ.ordinal());
     }
 
     @FXML
@@ -193,10 +202,13 @@ public class Controller {
     	}
     	// While the enrolled function is not complete, use this
     	List<Course> enrolled = getSearchCourse();
+    	String texts = "The (unadjusted) SFQ score for your enrolled course(s):\n";
     	for(Course course: enrolled) {
     		double score = scraper.SFQLookUp(course);
-    		System.out.println("SFQ score for " + course.getCourseCode() + ": " + score);
+    		texts += String.format("%s: %.2f\n", course.getCourseCode(), score);
     	}
+    	consoleText[TabLabel.SFQ.ordinal()] = "";
+    	printTextInConsole(texts, TabLabel.SFQ.ordinal());
     	
     }
 
@@ -531,7 +543,7 @@ public class Controller {
     			enrolled.add(course);
     			break;
     		}
-			if(++count >= 15) 
+			if(++count >= 5) 
 				break;
     	}
     	return enrolled;
