@@ -153,7 +153,7 @@
                            <children>
                               <Label layoutX="82.0" layoutY="31.0" text="SFQ URL" />
                               <TextField fx:id="textfieldSfqUrl" layoutX="147.0" layoutY="27.0" prefHeight="25.0" prefWidth="403.0" text="http://sfq.ust.hk/results/eng-f19.html " />
-                              <Button fx:id="buttonSfqEnrollCourse" layoutX="147.0" layoutY="64.0" mnemonicParsing="false" onAction="#findSfqEnrollCourse" text="Find SFQ with my enrolled courses" />
+                              <Button fx:id="buttonSfqEnrollCourse" disable="true" layoutX="147.0" layoutY="64.0" mnemonicParsing="false" onAction="#findSfqEnrollCourse" text="Find SFQ with my enrolled courses" />
                               <Button fx:id="buttonInstructorSfq" layoutX="384.0" layoutY="64.0" mnemonicParsing="false" onAction="#findInstructorSfq" text="List instructors' average SFQ" />
                               <Label layoutX="42.0" layoutY="132.0" text="You may assume no login is required when you scrape the SFQ page" />
                               <Label layoutX="42.0" layoutY="176.0" prefHeight="44.0" prefWidth="601.0" text="When Find SFQ button is clicked, unadjusted SFQ data will be printed (not the data inside [] ). If a course has multiple section,s only the course average is needed." wrapText="true" />
