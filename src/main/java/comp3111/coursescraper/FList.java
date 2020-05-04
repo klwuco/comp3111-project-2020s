@@ -15,11 +15,14 @@ public class FList {
 	
 	CheckBox enroll;
 	
+	//For task 4 only, sorry for being lazy
+	Section _section;
+	
 	
 	
 
 	public FList(String courseCode, String section, String courseName,
-			String instructor) {
+			String instructor, Section _section) {
 		super();
 		this.courseCode = new SimpleStringProperty(courseCode);
 		this.section = new SimpleStringProperty(section);
@@ -27,6 +30,9 @@ public class FList {
 		this.instructor = new SimpleStringProperty(instructor);
 		CheckBox enroll = new CheckBox();
 		this.enroll = enroll;
+		this._section = _section;
+		
+		
 		
 	}
 	
@@ -36,8 +42,9 @@ public class FList {
 		 _flist.courseName = this.courseName;
 		 _flist.instructor = this.instructor;
 		 _flist.enroll = this.enroll;
-		 
+		 _flist._section = this._section;
 	}
+
 
 
 	public String getCourseCode() {
@@ -80,4 +87,11 @@ public class FList {
 		this.enroll = enroll;
 	}
 	
+	public Section get_section() {
+		return _section;
+	}
+
+	public void set_section(Section _section) {
+		this._section = _section;
+	}
 }
