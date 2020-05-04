@@ -229,6 +229,39 @@ public class Controller {
     	
     }
     
+    
+    /**
+	 * Obtain a subjects list when the searchAll button in All Subjects Search tab is clicked at the first time
+	 * Search all courses information of all subjects in the subjects list when the searchAll button in All Subjects Search tab is clicked at the second time
+	 */
+    @FXML
+    void allSubjectSearch() {
+        new Thread(() -> {
+            if(!subjectIsSearched()) return;
+            enableMainTabInput(false);
+			      buttonSearchAll.setDisable(true);
+            progressbar.setProgress(0);
+            final double increment = 1.0 / subjects.length;
+            int counted_course = 0;
+            courses = new Vector<Course>();
+            for (String subject : subjects) {
+                counted_course += searchCourse(subject);
+                System.out.println(subject + " is done");
+                Platform.runLater( () -> progressbar.setProgress(progressbar.getProgress() + increment) );
+                try {Thread.sleep(100);} catch (Exception e) {}
+            }
+            progressbar.setProgress(1);
+
+            String newline = "Total Number of Courses fetched : ";
+            newline += Integer.toString(counted_course) + "\n";
+            printTextInConsole(newline, TabLabel.AllSubject.ordinal());
+            enableMainTabInput(true);
+			      buttonSearchAll.setDisable(false);
+            Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
+            enableSFQInstructorButton();
+        }).start();
+    }
+   
     /** 
      * Prints (unadjusted) SFQ score of all instructors on the console in GUI.
      * (task 6)
@@ -299,49 +332,18 @@ public class Controller {
     void search() {
 
         new Thread(() -> {
-			enableMainTabInput(false);
+			      enableMainTabInput(false);
             subjectIsSearched();
-			courses = new Vector<Course>();
+			      courses = new Vector<Course>();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
-			enableMainTabInput(true);
+			      enableMainTabInput(true);
             Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
     	
     }
 
-	/**
-	 * Obtain a subjects list when the searchAll button in All Subjects Search tab is clicked at the first time
-	 * Search all courses information of all subjects in the subjects list when the searchAll button in All Subjects Search tab is clicked at the second time
-	 */
-	@FXML
-    void allSubjectSearch() {
-        new Thread(() -> {
-            if(!subjectIsSearched()) return;
-			enableMainTabInput(false);
-			buttonSearchAll.setDisable(true);
-            progressbar.setProgress(0);
-            final double increment = 1.0 / subjects.length;
-            int counted_course = 0;
-            courses = new Vector<Course>();
-            for (String subject : subjects) {
-                counted_course += searchCourse(subject);
-                System.out.println(subject + " is done");
-                Platform.runLater( () -> progressbar.setProgress(progressbar.getProgress() + increment) );
-                try {Thread.sleep(100);} catch (Exception e) {}
-            }
-            progressbar.setProgress(1);
-            String newline = "Total Number of Courses fetched : ";
-            newline += Integer.toString(counted_course) + "\n";
-            printTextInConsole(newline, TabLabel.AllSubject.ordinal());
-			enableMainTabInput(true);
-			buttonSearchAll.setDisable(false);
-            // Temp Logic to update timetable when search is performed
-            Platform.runLater(() -> {renderTimeTable();});
-            enableSFQInstructorButton();
-        }).start();
-    }
 	/**
 	 * Change text message in the console when tab is Changed
 	 */
