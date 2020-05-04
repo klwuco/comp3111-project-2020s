@@ -311,14 +311,14 @@ public class Scraper {
 	
 	/**
 	 * Look up the SFQ score of a course. scrapeSFQ should be called first to populate the course record.
-	 * @param course The course to check the SFQ score
+	 * @param courseCode The course code to check the SFQ score
 	 * @return the (unadjusted) simple average of SFQ scores over all sections
 	 */
-	public double SFQLookUp(Course course){
+	public double SFQLookUp(String courseCode){
 		if(_courseLookUpTable.isEmpty())
 			return Double.NaN;
-		if(_courseLookUpTable.containsKey(course.getCourseCode())) {
-			return _courseLookUpTable.get(course.getCourseCode());
+		if(_courseLookUpTable.containsKey(courseCode)) {
+			return _courseLookUpTable.get(courseCode);
 			}
 		return Double.NaN;
 	}

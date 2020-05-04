@@ -245,14 +245,15 @@ public class Controller {
             String newline = "Total Number of Courses fetched : ";
             newline += Integer.toString(counted_course) + "\n";
             printTextInConsole(newline, TabLabel.AllSubject.ordinal());
-            // Temp Logic to update timetable when search is performed
-            Platform.runLater(() -> {renderTimeTable();});
             Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
     }
    
-
+    /** 
+     * Prints (unadjusted) SFQ score of all instructors on the console in GUI.
+     * (task 6)
+     */
     @FXML
     void findInstructorSfq() {
     	List<Instructor> instructors;
@@ -276,7 +277,12 @@ public class Controller {
     	consoleText[TabLabel.SFQ.ordinal()] = "";
     	printTextInConsole(texts, TabLabel.SFQ.ordinal());
     }
-
+    
+    /** 
+     * Prints (unadjusted) SFQ score of enrolled courses on the console in GUI.
+     * The button is enabled only after a search or all subject search is performed.
+     * (task 6)
+     */
     @FXML
     void findSfqEnrollCourse(){
     	try {
@@ -290,12 +296,17 @@ public class Controller {
                 alert.showAndWait();
             });
     	}
-    	// While the enrolled function is not complete, use this
-    	List<Course> enrolled = getSearchCourse();
     	String texts = "The (unadjusted) SFQ score for your enrolled course(s):\n";
-    	for(Course course: enrolled) {
-    		double score = scraper.SFQLookUp(course);
-    		texts += String.format("%s: %.2f\n", course.getCourseCode(), score);
+		HashSet<String> courseList = new HashSet<String>();
+    	for(FList flist: enrolledList) {
+    		String courseCode = flist.getCourseCode();
+    		// If no duplicates
+    		if(!courseList.contains(courseCode)) {
+    			courseList.add(courseCode);
+    			// Look up score
+    			double score = scraper.SFQLookUp(flist.getCourseCode());
+        		texts += String.format("%s: %.2f\n", flist.getCourseCode(), score);
+    		}
     	}
     	consoleText[TabLabel.SFQ.ordinal()] = "";
     	printTextInConsole(texts, TabLabel.SFQ.ordinal());
@@ -310,8 +321,6 @@ public class Controller {
             courses = new Vector<Course>();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
-            // Temp Logic to update timetable when search is performed
-            Platform.runLater(() -> {renderTimeTable();});
             Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
@@ -325,8 +334,10 @@ public class Controller {
         );
     }
     
-    //Task2
-    //Imply the behavior of Selected-All and De-selected All button
+    /**
+     * Task2
+     * Imply the behavior of Selected-All and De-selected All button
+     */
     @FXML
 	void SelectAll(){
     	if(buttonSelectAll.getText().equals("Select All")) {
@@ -364,8 +375,10 @@ public class Controller {
     	
 	}
     
-    //Task2,3
-    //Handling the filter result, while updating the filteredList and tableView for task 3
+    /**
+     * Task2,3
+     * Handling the filter result, while updating the filteredList and tableView for task 3
+     */
     @FXML
     void filter() {
     	//Clear the interface and the filteredList
@@ -507,8 +520,10 @@ public class Controller {
     	fillTable();
     }
     
-    //Task 3 
-    //fill in and update the tableView
+    /**
+     * Task 3 
+     * fill in and update the tableView
+     */
     private void fillTable() {
         //update the checkbox status for already enrolled course in tableView 	
     	//perform linear search for each courses in filteredList, and look through courses in enrolledList,
@@ -539,10 +554,13 @@ public class Controller {
 	
     }
     
-    //Task3
-    //Action performed when any of the chcekbox status is changed
-    //Mainly update the enrolledList, which is useful for task 4
-    //Also, print out the newest version of enrolled course list(enrolledList).
+
+    /**
+     * Task3
+     * Action performed when any of the chcekbox status is changed
+     * Mainly update the enrolledList, which is useful for task 4
+     * Also, print out the newest version of enrolled course list(enrolledList).
+     */
     private void startEnroll() {
     	//clear the console
     	textAreaConsole.clear();
@@ -581,7 +599,7 @@ public class Controller {
     		}
     		
     	}
-    	
+        renderTimeTable();
     	//print out the updated version of the enrolled course section list
     	String newline = "The following sections are enrolled:" + "\n";
     	for(int i = 0; i < enrolledList.size(); ++i) {
@@ -698,19 +716,25 @@ public class Controller {
         return courses.size();
     }
     
+    /** 
+     * Render the timetable corresponding to the enrolled sections.
+     * 
+     */
 	private void renderTimeTable() {
-		// While the enrolled function is not complete, use this
-    	List<Course> enrolled = getSearchCourse();
-    	for(Course course: enrolled) {
-    		renderSession(course.getCourseCode(), course.getSection()[0]);
-    	}
+    	for(FList flist: enrolledList)
+    		renderSection(flist.getCourseCode(), flist.get_section());
     }
     
-    private void renderSession(String course_code, Section section) {
+	/**
+	 * Render the section onto the timetable.
+	 * @param courseCode The course code of the course
+	 * @param section The section object to render
+	 */
+    private void renderSection(String courseCode, Section section) {
     	final float LABEL_WIDTH = 100.0f;
     	AnchorPane ap = (AnchorPane)tabTimetable.getContent();
     	String sectionName = section.getSectionCode();
-    	String labelText = course_code + '\n' + sectionName;
+    	String labelText = courseCode + '\n' + sectionName;
     	Slot slots[] = section.getSlot();
     	Color color = randomColor();
     	for(Slot slot: slots) {
@@ -731,6 +755,10 @@ public class Controller {
     	}
     }
     
+    /**
+     * Returns a random (light) color
+     * @return A random (light) color
+     */
     private Color randomColor() {
     	final float alpha = 0.5f;
     	Random r = new Random();
@@ -763,6 +791,12 @@ public class Controller {
             Platform.runLater( () -> textAreaConsole.setText(consoleText[index]) );
     }
 
+    /**
+     * Translates slot time to coordinates in timetable
+     * @param hour The hour of time
+     * @param minute The minute of time
+     * @return The y coordinate corresponding to the position in the timetable
+     */
     private float timeToLabelYPos(int hour, int minute) {
     	final float offset = 40.f;
     	final int classStartTime = 9;
@@ -771,31 +805,12 @@ public class Controller {
     	return pos;
     }
     
+    /**
+     * Enables the button to look up instructor SFQ score
+     */
     void enableSFQInstructorButton() {
     	Platform.runLater(()-> buttonSfqEnrollCourse.setDisable(false));
     }
-    
-    private List<Course> getSearchCourse(){
-    	// Simulate select course
-    	List<Course> enrolled = new ArrayList<Course>();
-    	int count = 0;
-    	while(true) {
-    		Course course = courses.get(count);
-    		for(Section section: course.getSection()) {
-    			if(section == null)
-    				break;
-    			enrolled.add(course);
-    			break;
-    		}
-			if(++count >= 5) 
-				break;
-    	}
-    	return enrolled;
-    }
-
-    
 }
-
-	
 
 
