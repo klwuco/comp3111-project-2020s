@@ -241,7 +241,6 @@ public class Scraper {
 	private HashMap<String, Instructor> _instructorSFQTable = new HashMap<String, Instructor>();
 	
 	public void scrapeSFQ(String baseurl) throws Exception {
-		baseurl = "file:///C:\\Users\\xdlok\\Documents\\GitHub\\comp3111-project-2020s\\src\\main\\resources\\sfq.html";
 		// Reset tables
 		_courseLookUpTable = new HashMap<String, Double>();
 		_instructorSFQTable = new HashMap<String, Instructor> ();
