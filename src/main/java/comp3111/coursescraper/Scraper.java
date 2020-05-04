@@ -322,7 +322,7 @@ public class Scraper {
 	 * Obtain the SFQ scores of all instructors
 	 * @param baseurl The base url of the SFQ website
 	 * @return A list of instructors scrapped from the SFQ site and their scores
-	 * @throws Exception
+	 * @throws Exception Scrape fail: bad site or bad connection
 	 */
 	public List<Instructor> scrapeSFQInstructor(String baseurl) throws Exception{
 		scrapeSFQ(baseurl);
