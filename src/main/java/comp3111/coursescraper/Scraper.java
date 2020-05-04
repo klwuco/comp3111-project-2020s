@@ -271,7 +271,7 @@ public class Scraper {
 					numSection++;
 				}
 			}else if(isInstructor(td)) { // Instructor column
-				String instructorName = ((HtmlElement) td.get(2)).asText();
+				String instructorName = ((HtmlElement) td.get(2)).asText().trim();
 				// Grab instructor entry, or create one of not yet created
 				_instructorSFQTable.putIfAbsent(instructorName, new Instructor(instructorName));
 				Instructor instructor = _instructorSFQTable.get(instructorName);
