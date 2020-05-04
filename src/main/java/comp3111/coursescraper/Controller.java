@@ -44,19 +44,25 @@ import java.util.Collections;
 
 public class Controller {
 
-    private String[] subjects;
+	private String searchedUrl;
 
-    private List<Course> courses = new ArrayList<Course>();
+	private String searchedTerm;
+
+    private String[] subjects;
 
     private String[] consoleText = initializeStringArray();
 
     private Scraper scraper = new Scraper();
+
+	private List<Course> courses = new ArrayList<Course>();
     
     private List<FList> filteredList = new ArrayList<FList>();
     
     private List<FList> enrolledList = new ArrayList<FList>();
     
     private List<CheckBox> enrollBox = new ArrayList<CheckBox>();
+
+	private HashSet<Color> timetableColors = new HashSet<Color>();
   
     private LocalTime noon = LocalTime.parse("12:00:00");
 
@@ -77,22 +83,7 @@ public class Controller {
     private Tab tabMain;
 
     @FXML
-    private TextField textfieldTerm;
-
-    @FXML
-    private TextField textfieldSubject;
-
-    @FXML
-    private Button buttonSearch;
-
-    @FXML
-    private TextField textfieldURL;
-
-    @FXML
     private Tab tabStatistic;
-
-    @FXML
-    private ComboBox<?> comboboxTimeSlot;
 
     @FXML
     private Tab tabFilter;
@@ -109,24 +100,38 @@ public class Controller {
     @FXML
     private ProgressBar progressbar;
 
+	@FXML
+    private ComboBox<?> comboboxTimeSlot;
+
+    @FXML
+    private TextField textfieldTerm;
+
+    @FXML
+    private TextField textfieldSubject;
+
+    @FXML
+    private TextField textfieldURL;
+
     @FXML
     private TextField textfieldSfqUrl;
+
+	@FXML
+    private Button buttonSearch;
+
+	@FXML
+    private Button buttonSearchAll;
 
     @FXML
     private Button buttonSfqEnrollCourse;
 
     @FXML
     private Button buttonInstructorSfq;
-
-    @FXML
-    private TextArea textAreaConsole;
-    
-    private HashSet<Color> timetableColors = new HashSet<Color>();
-    
-	
-    
+        
     @FXML
     private Button buttonSelectAll;
+
+	@FXML
+    private TextArea textAreaConsole;
     
     @FXML
     private CheckBox checkboxAM;
@@ -225,11 +230,16 @@ public class Controller {
     }
     
     
-    
+    /**
+	 * Obtain a subjects list when the searchAll button in All Subjects Search tab is clicked at the first time
+	 * Search all courses information of all subjects in the subjects list when the searchAll button in All Subjects Search tab is clicked at the second time
+	 */
     @FXML
     void allSubjectSearch() {
         new Thread(() -> {
             if(!subjectIsSearched()) return;
+            enableMainTabInput(false);
+			      buttonSearchAll.setDisable(true);
             progressbar.setProgress(0);
             final double increment = 1.0 / subjects.length;
             int counted_course = 0;
@@ -245,6 +255,8 @@ public class Controller {
             String newline = "Total Number of Courses fetched : ";
             newline += Integer.toString(counted_course) + "\n";
             printTextInConsole(newline, TabLabel.AllSubject.ordinal());
+            enableMainTabInput(true);
+			      buttonSearchAll.setDisable(false);
             Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
@@ -313,20 +325,28 @@ public class Controller {
     	
     }
 
+	/**
+	 * Obtain a subjects list and search all courses information of a subject when the search button in Main tab is clicked
+	 */
     @FXML
     void search() {
 
         new Thread(() -> {
+			      enableMainTabInput(false);
             subjectIsSearched();
-            courses = new Vector<Course>();
+			      courses = new Vector<Course>();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
+			      enableMainTabInput(true);
             Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
     	
     }
 
+	/**
+	 * Change text message in the console when tab is Changed
+	 */
     @FXML
     void onTabChange(){
         Platform.runLater( () -> 
@@ -610,10 +630,17 @@ public class Controller {
     	
     }
 
+	/**
+	 * Obtain the subject list if it is not searched before
+	 * @return The boolean value indicates the subject list is searched before
+	 */
     private Boolean subjectIsSearched() {
-        if (subjects != null) return true;
+		String url = textfieldURL.getText();
+		String term = textfieldTerm.getText();
+        if ( subjects != null && term.equals(searchedTerm) && url.equals(searchedUrl) ) return true;
         
-        subjects = scraper.scrapeSubject(textfieldURL.getText(), textfieldTerm.getText());
+		buttonSearchAll.setDisable(true);
+		subjects = scraper.scrapeSubject(url, term);
         if(subjects == null){
             Platform.runLater( () -> {
                 final Alert alert = new Alert(AlertType.ERROR);
@@ -622,18 +649,26 @@ public class Controller {
                 alert.setContentText("404 NOT FOUND! \n Please Check the Base URL and Term.");
                 alert.showAndWait();
             });
+			buttonSearchAll.setDisable(false);
             return false;
         }
-
         String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(subjects.length) + "\n";
         printTextInConsole(newline, TabLabel.AllSubject.ordinal());
+		searchedUrl = url;
+		searchedTerm = term;
+		buttonSearchAll.setDisable(false);
         
         return false;
         
     }
 
+	/**
+	 * Search all courses information of a subject
+	 * @param subject the subject code of a subject which is needed to be search
+	 * @return the number of scraped courses in this searching
+	 */
     private int searchCourse(String subject){
-        
+
     	List<Course> courseList = scraper.scrape(textfieldURL.getText(), textfieldTerm.getText(), subject);
 
         if(courseList == null) {
@@ -644,6 +679,7 @@ public class Controller {
                 // alert.setHeaderText(null);
                 alert.setContentText("404 NOT FOUND! \n Please Check the Base URL, Term and Subject.");
                 alert.showAndWait();
+				
             });
             return 0;
         }
@@ -773,13 +809,21 @@ public class Controller {
     	return c;
     }
 
-  
+	/**
+	 * Create and initialize a string array
+	 * @return a initialize string array with empty string
+	 */
     private String[] initializeStringArray(){
         String[] array = new String[TabLabel.values().length];
         Arrays.fill(array, "");
         return array;
     }
 
+	/**
+	 * Save the text message and print it in the console in a particular tab if the tab is showed currently
+	 * @param newline the text message in the console in a tab
+	 * @param index the index number represents a tab
+	 */
     private void printTextInConsole(String newline, int index){
         final int MAX_LENGTH = 20000;
         if(consoleText[index].length() > MAX_LENGTH) {
@@ -803,6 +847,13 @@ public class Controller {
     	float fractionHour = minute / 60.0f; // Turn minute to fractions of hours
     	float pos = (hour + fractionHour - classStartTime) * 20.0f + offset;
     	return pos;
+    }
+
+	private void enableMainTabInput(Boolean enable) {
+		textfieldURL.setDisable(!enable);
+		textfieldTerm.setDisable(!enable);
+		textfieldSubject.setDisable(!enable);
+    	buttonSearch.setDisable(!enable);
     }
     
     /**

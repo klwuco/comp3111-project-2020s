@@ -93,7 +93,13 @@ public class Scraper {
 		client.getOptions().setCssEnabled(false);
 		client.getOptions().setJavaScriptEnabled(false);
 	}
-
+	/**
+	 * Add a slot and the instructor belongs to a section  
+	 * @param e The scraped data of a course section
+	 * @param section The section of a course
+	 * @param c The course which is needed to be scraped
+	 * @param secondRow The boolean value indicates whether the scraped data is multiple
+	 */
 	private void addSlot(HtmlElement e, Section section, Course c, boolean secondRow) {
 		String[] date_times = e.getChildNodes().get(secondRow ? 0 : 3).asText().split("\n");
 		String times[] =  date_times[date_times.length-1].split(" ");
@@ -135,6 +141,12 @@ public class Scraper {
 
 	}
 
+	/**
+	 * Obtain all subjects name from the baseurl website
+	 * @param baseurl The base url of the course enrolment information website
+	 * @param term The combination number of the academic year and the term of the year
+	 * @return A string array of all subjects name scrapped from the course enrolment information website
+	 */
 	public String[] scrapeSubject(String baseurl, String term) {
 		
 		try {
@@ -156,6 +168,13 @@ public class Scraper {
 
 	}
 
+	/**
+	 * Obtain all courses information of a subject
+	 * @param baseurl The base url of the course enrolment information website
+	 * @param term The combination number of the academic year and the term of the year
+	 * @param sub The code of a course
+	 * @return A list of course scrapped from the course enrolment information website
+	 */
 	public List<Course> scrape(String baseurl, String term, String sub) {
 
 		try {
