@@ -135,7 +135,7 @@
                     <content>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                            <children>
-                              <Button layoutX="73.0" layoutY="29.0" mnemonicParsing="false" onAction="#allSubjectSearch" text="All Subject Search" />
+                              <Button fx:id="buttonSearchAll" layoutX="73.0" layoutY="29.0" mnemonicParsing="false" onAction="#allSubjectSearch" text="All Subject Search" />
                               <ProgressBar fx:id="progressbar" layoutX="316.0" layoutY="33.0" prefHeight="18.0" prefWidth="264.0" progress="0.0" />
                               <Label layoutX="255.0" layoutY="34.0" text="Progress" />
                               <Label layoutX="65.0" layoutY="210.0" text="Total Number of Categories/Code Prefix" />
