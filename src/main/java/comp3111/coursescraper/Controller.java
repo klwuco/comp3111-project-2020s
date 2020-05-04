@@ -211,12 +211,16 @@ public class Controller {
     //Since the list is filled during runtime, nothing is required to be imported by observable list
     //so import a blank sheet
     public ObservableList<FList> getList(){
-    	ObservableList<FList> filteredList= FXCollections.observableArrayList();
+    	ObservableList<FList> startList= FXCollections.observableArrayList();
+    	
+    	
+    	
+    	
     	
 //    	filteredList.add(new FList("ABC123","L1","Happy","Me"));
 //    	filteredList.add(new FList("ABC234","L2","Sad","He"));
     	
-    	return filteredList;
+    	return startList;
     	
     }
     
@@ -243,6 +247,7 @@ public class Controller {
             printTextInConsole(newline, TabLabel.AllSubject.ordinal());
             // Temp Logic to update timetable when search is performed
             Platform.runLater(() -> {renderTimeTable();});
+            Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
     }
@@ -307,6 +312,7 @@ public class Controller {
                 searchCourse(textfieldSubject.getText());
             // Temp Logic to update timetable when search is performed
             Platform.runLater(() -> {renderTimeTable();});
+            Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
     	
@@ -489,7 +495,7 @@ public class Controller {
                         	
                             newline += section + " Slot " + i++ + ":" + t + "\n";
                     //update the filteredList for task3, and pulling the checkboxes to the controller
-                    filteredList.add(new FList(c.getCourseCode(),section.getSectionCode(),c.getTitle(),section.getInstructor()));
+                    filteredList.add(new FList(c.getCourseCode(),section.getSectionCode(),c.getTitle(),section.getInstructor(),section));
                     enrollBox.add(filteredList.get(filteredList.size()-1).getEnroll());
                    
                 }
@@ -787,6 +793,7 @@ public class Controller {
     	return enrolled;
     }
 
+    
 }
 
 	
