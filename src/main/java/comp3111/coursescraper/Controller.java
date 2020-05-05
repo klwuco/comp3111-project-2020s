@@ -186,8 +186,9 @@ public class Controller {
     
     
     
-     
-    //initialize the tableView
+    /**
+     * initialize the tableView
+     */
     @FXML
     public void initialize() {
     	courseCode.setCellValueFactory(new PropertyValueFactory<FList,String>("courseCode"));
@@ -207,14 +208,17 @@ public class Controller {
     
     	
     	tableView.setItems(getList());
-    	//tableView.getItems().add(getList());
+    	
     	
     	
     }
     
-    //create data to fill in in initializing tableView
-    //Since the list is filled during runtime, nothing is required to be imported by observable list
-    //so import a blank sheet
+    /**
+     * //create data to fill in in initializing tableView
+     * //Since the list is filled during runtime, nothing is required to be imported by observable list
+     * //so import a blank sheet
+     * @return ObservableList getList for initializing the tableView
+     */
     public ObservableList<FList> getList(){
     	ObservableList<FList> startList= FXCollections.observableArrayList();
     	
@@ -222,8 +226,7 @@ public class Controller {
     	
     	
     	
-//    	filteredList.add(new FList("ABC123","L1","Happy","Me"));
-//    	filteredList.add(new FList("ABC234","L2","Sad","He"));
+
     	
     	return startList;
     	
