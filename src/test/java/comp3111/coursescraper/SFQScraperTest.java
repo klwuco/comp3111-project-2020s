@@ -42,4 +42,5 @@ public class SFQScraperTest {
 		double score = scraper.SFQLookUp(course.getCourseCode());
 		assertEquals(score, Double.NaN, delta);
 	}
+
 }
