@@ -3,6 +3,7 @@ package comp3111.coursescraper;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.Before;
+import java.io.File;
 import java.util.List;
 import java.util.Vector;
 
@@ -12,6 +13,7 @@ import comp3111.coursescraper.Course;
 public class CourseScraperTest {
 	
 	private String url, term, subject;
+	private final String baseurl = "file:/" + (new File("src/main/resources").getAbsolutePath());
 	private Scraper scraper = new Scraper();
 	private List<Course> courses;
 
@@ -20,10 +22,9 @@ public class CourseScraperTest {
 		final String title = "ACCT 1010 - Accounting, Business and Society (3 units)";
 		Course course = null;
 		String result;
-		url = "https://w5.ab.ust.hk/wcq/cgi-bin/";
 		term = "1940";
 		subject = "ACCT";
-		courses = scraper.scrape(url,term,subject);
+		courses = scraper.scrape(baseurl,term,subject);
 		while(true){
 			if(courses!=null){
 				for(Course c: courses) {
@@ -39,11 +40,10 @@ public class CourseScraperTest {
 	@Test
 	public void testSearchCourseCountNormal() throws Exception {
 		int numberOfScrapedCourse;
-		final int expectedNumber = 5;
-		url = "https://w5.ab.ust.hk/wcq/cgi-bin/";
+		final int expectedNumber = 6;
 		term = "1940";
 		subject = "COMP";
-		courses = scraper.scrape(url,term,subject);
+		courses = scraper.scrape(baseurl,term,subject);
 		while(true){
 			if(courses!=null){
 				numberOfScrapedCourse = courses.size();
@@ -55,19 +55,17 @@ public class CourseScraperTest {
 	
 	@Test
 	public void testSearchCourseInvalidTerm() throws Exception {
-		url = "https://w5.ab.ust.hk/wcq/cgi-bin/";
 		term = "1810";
 		subject = "ACCT";
-		courses = scraper.scrape(url,term,subject);
+		courses = scraper.scrape(baseurl,term,subject);
 		assertNull(courses);
 	}
 
 	@Test
 	public void testSearchCourseInvalidSubject() throws Exception {
-		url = "https://w5.ab.ust.hk/wcq/cgi-bin/";
 		term = "1920";
 		subject = "TEST";
-		courses = scraper.scrape(url,term,subject);
+		courses = scraper.scrape(baseurl,term,subject);
 		assertNull(courses);
 	}
 
