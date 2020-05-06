@@ -240,9 +240,13 @@ public class Controller {
     @FXML
     void allSubjectSearch() {
         new Thread(() -> {
-            if(!subjectIsSearched()) return;
-            enableMainTabInput(false);
-			      buttonSearchAll.setDisable(true);
+			enableTabInput(false);
+			// buttonSearchAll.setDisable(true);
+            if(!subjectIsSearched()) {
+				enableTabInput(true);
+				// buttonSearchAll.setDisable(false);
+				return;
+			}
             progressbar.setProgress(0);
             final double increment = 1.0 / subjects.length;
             int counted_course = 0;
@@ -258,8 +262,8 @@ public class Controller {
             String newline = "Total Number of Courses fetched : ";
             newline += Integer.toString(counted_course) + "\n";
             printTextInConsole(newline, TabLabel.AllSubject.ordinal());
-            enableMainTabInput(true);
-			      buttonSearchAll.setDisable(false);
+            enableTabInput(true);
+			// buttonSearchAll.setDisable(false);
             Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
@@ -335,12 +339,14 @@ public class Controller {
     void search() {
 
         new Thread(() -> {
-			      enableMainTabInput(false);
+			enableTabInput(false);
+			// buttonSearchAll.setDisable(true);
             subjectIsSearched();
-			      courses = new Vector<Course>();
+			courses = new Vector<Course>();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
-			      enableMainTabInput(true);
+			enableTabInput(true);
+			// buttonSearchAll.setDisable(false);
             Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
@@ -641,8 +647,6 @@ public class Controller {
 		String url = textfieldURL.getText();
 		String term = textfieldTerm.getText();
         if ( subjects != null && term.equals(searchedTerm) && url.equals(searchedUrl) ) return true;
-        
-		buttonSearchAll.setDisable(true);
 		subjects = scraper.scrapeSubject(url, term);
         if(subjects == null){
             Platform.runLater( () -> {
@@ -652,14 +656,12 @@ public class Controller {
                 alert.setContentText("404 NOT FOUND! \n Please Check the Base URL and Term.");
                 alert.showAndWait();
             });
-			buttonSearchAll.setDisable(false);
             return false;
         }
         String newline = "Total Number of Categories/Code Prefix: " + Integer.toString(subjects.length) + "\n";
         printTextInConsole(newline, TabLabel.AllSubject.ordinal());
 		searchedUrl = url;
 		searchedTerm = term;
-		buttonSearchAll.setDisable(false);
         
         return false;
         
@@ -852,11 +854,12 @@ public class Controller {
     	return pos;
     }
 
-	private void enableMainTabInput(Boolean enable) {
+	private void enableTabInput(Boolean enable) {
 		textfieldURL.setDisable(!enable);
 		textfieldTerm.setDisable(!enable);
 		textfieldSubject.setDisable(!enable);
     	buttonSearch.setDisable(!enable);
+		buttonSearchAll.setDisable(!enable);
     }
     
     /**
