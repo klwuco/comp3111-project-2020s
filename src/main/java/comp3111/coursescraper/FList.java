@@ -17,7 +17,19 @@ public class FList {
 	
 	//For task 4 only, sorry for being lazy
 	Section _section;
-	
+	/**
+	 * Default constructor of FList
+	 */
+	public FList() {
+		super();
+		this.courseCode = new SimpleStringProperty();
+		this.section = new SimpleStringProperty();
+		this.courseName = new SimpleStringProperty();
+		this.instructor = new SimpleStringProperty();
+		this.enroll = null;
+		this._section = null;
+	}
+
 	/** 
 	 * Parameterized constructor of FList
 	 * @param courseCode the Course Code column attribute
