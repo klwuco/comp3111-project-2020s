@@ -7,6 +7,7 @@ package comp3111.coursescraper;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.testfx.assertions.api.Assertions;
 import org.testfx.framework.junit.ApplicationTest;
@@ -27,6 +28,14 @@ public class FxTest extends ApplicationTest {
 
 	private Scene s;
 	
+//	private String baseurl = getClass().getResource("/COMP").toString();
+//	private Scraper scraper = new Scraper();
+//	
+//	@Before
+//	public void setup() throws Exception{
+//		scraper.scrapeSFQ(baseurl);
+//	}
+	
 	@Override
 	public void start(Stage stage) throws Exception {
     	FXMLLoader loader = new FXMLLoader();
@@ -42,6 +51,9 @@ public class FxTest extends ApplicationTest {
 
 	@Test
 	public void testButtonSelectAll() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#buttonSelectAll");
 		Button b = (Button)s.lookup("#buttonSelectAll");
@@ -73,6 +85,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testButtonDeSelectAll() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#buttonSelectAll");
 		clickOn("#buttonSelectAll");
@@ -105,6 +120,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxAM() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxAM");
 		CheckBox am = (CheckBox)s.lookup("#checkboxAM");
@@ -114,6 +132,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxPM() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxPM");
 		CheckBox pm = (CheckBox)s.lookup("#checkboxPM");
@@ -123,6 +144,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxAMPM() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxAM");
 		clickOn("#checkboxPM");
@@ -135,6 +159,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxMon() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxMon");
 		CheckBox mon = (CheckBox)s.lookup("#checkboxMon");
@@ -144,6 +171,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxTue() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxTue");
 		CheckBox tue = (CheckBox)s.lookup("#checkboxTue");
@@ -153,6 +183,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxWed() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxWed");
 		CheckBox wed = (CheckBox)s.lookup("#checkboxWed");
@@ -162,6 +195,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxThu() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxThu");
 		CheckBox thu = (CheckBox)s.lookup("#checkboxThu");
@@ -171,6 +207,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxFri() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxFri");
 		CheckBox fri = (CheckBox)s.lookup("#checkboxFri");
@@ -180,6 +219,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxSat() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxSat");
 		CheckBox sat = (CheckBox)s.lookup("#checkboxSat");
@@ -189,6 +231,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxCC() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxCC");
 		CheckBox cc = (CheckBox)s.lookup("#checkboxCC");
@@ -198,6 +243,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxEx() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxNoEx");
 		CheckBox ex = (CheckBox)s.lookup("#checkboxNoEx");
@@ -207,6 +255,9 @@ public class FxTest extends ApplicationTest {
 	
 	@Test
 	public void testCheckBoxlt() {
+		clickOn("#tabMain");
+		clickOn("#buttonSearch");
+		sleep(10000);
 		clickOn("#tabFilter");
 		clickOn("#checkboxWLoT");
 		CheckBox lt = (CheckBox)s.lookup("#checkboxWLoT");
