@@ -22,7 +22,7 @@ public class SFQScraperTest {
 	public void testSFQCourseNormal() {
 		Course course = new Course();
 		course.setTitle("BIEN 4000A");
-		double score = scraper.SFQLookUp(course);
+		double score = scraper.SFQLookUp(course.getCourseCode());
 		assertEquals(score, 58.3d, delta);
 	}
 	
@@ -30,7 +30,7 @@ public class SFQScraperTest {
 	public void testSFQCourseTakeAverage() {
 		Course course = new Course();
 		course.setTitle("COMP 1021");
-		double score = scraper.SFQLookUp(course);
+		double score = scraper.SFQLookUp(course.getCourseCode());
 		final double expected = (91.5d + 88.5d + 91.0d) / 3.;
 		assertEquals(score, expected, delta);
 	}
@@ -39,7 +39,8 @@ public class SFQScraperTest {
 	public void testSFQCourseInvalidCourse() {
 		Course course = new Course();
 		course.setTitle("TEST 9999");
-		double score = scraper.SFQLookUp(course);
+		double score = scraper.SFQLookUp(course.getCourseCode());
 		assertEquals(score, Double.NaN, delta);
 	}
+
 }

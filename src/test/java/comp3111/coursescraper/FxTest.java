@@ -7,8 +7,12 @@ package comp3111.coursescraper;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.testfx.assertions.api.Assertions;
 import org.testfx.framework.junit.ApplicationTest;
 
@@ -18,6 +22,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -27,14 +32,8 @@ import javafx.fxml.FXMLLoader;
 public class FxTest extends ApplicationTest {
 
 	private Scene s;
-	
-//	private String baseurl = getClass().getResource("/COMP").toString();
-//	private Scraper scraper = new Scraper();
-//	
-//	@Before
-//	public void setup() throws Exception{
-//		scraper.scrapeSFQ(baseurl);
-//	}
+	private String baseurl = "file:/" + (new File("src/main/resources").getAbsolutePath());
+	Scraper scraper = new Scraper();
 	
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -48,7 +47,6 @@ public class FxTest extends ApplicationTest {
    		s = scene;
 	}
 	
-
 	@Test
 	public void testButtonSelectAll() {
 		clickOn("#tabMain");
@@ -274,17 +272,63 @@ public class FxTest extends ApplicationTest {
 		assertTrue(!tv.isEditable());
 	}
 	
+	@Ignore
+	public void testExample() {
+		List<Course> courses = scraper.scrape(baseurl, "1910", "COMP");
+		assertTrue(courses.size()>0);
+	}
 
-	
+	@Test
+	public void testAvoidConflictDuringSearching() {
+		Button search = (Button)s.lookup("#buttonSearch");
+		Button searchAll = (Button)s.lookup("#buttonSearchAll");
+		TextField url = (TextField)s.lookup("#textfieldURL");
+		TextField term = (TextField)s.lookup("#textfieldTerm");
+		TextField subject = (TextField)s.lookup("#textfieldSubject");
+		term.setText("1940");
+		clickOn(search);
+		sleep(100);
+		Boolean result = search.isDisabled() && searchAll.isDisabled() && url.isDisabled() && term.isDisabled() && subject.isDisabled() ; 
+		assertTrue(result);
+	}
 
+	@Test
+	public void testAvoidConflictDuringAllSearching() {
+		Button search = (Button)s.lookup("#buttonSearch");
+		Button searchAll = (Button)s.lookup("#buttonSearchAll");
+		TextField url = (TextField)s.lookup("#textfieldURL");
+		TextField term = (TextField)s.lookup("#textfieldTerm");
+		TextField subject = (TextField)s.lookup("#textfieldSubject");
+		term.setText("1930");
+		clickOn("#tabAllSubject");
+		clickOn(searchAll);
+		sleep(100);
+		Boolean result = search.isDisabled() && searchAll.isDisabled() && url.isDisabled() && term.isDisabled() && subject.isDisabled() ; 
+		assertTrue(result);
+	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	@Test
+	public void testConsoleTextNormal() {
+		Button search = (Button)s.lookup("#buttonSearch");
+		TextField term = (TextField)s.lookup("#textfieldTerm");
+		TextArea consoleText = (TextArea)s.lookup("#textAreaConsole");
+		String textInMain, textInBackEnd, textInAllSubjectSearch;
+		Boolean result;
+		term.setText("1940");
+		clickOn(search);
+		while(true){
+			textInMain = consoleText.getText();
+			if(!textInMain.equals("")){
+				clickOn("#tabStatistic");
+				textInBackEnd = consoleText.getText();
+				result = !textInMain.equals(textInBackEnd);
+				clickOn("#tabAllSubject");
+				textInAllSubjectSearch = consoleText.getText();
+				result = result && !textInMain.equals(textInAllSubjectSearch) && !textInBackEnd.equals(textInAllSubjectSearch);
+				assertTrue(result);
+				return;
+			}
+		} 
+	}
+
 }
