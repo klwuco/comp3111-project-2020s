@@ -411,7 +411,8 @@ public class Controller {
     void filter() {
     	//Clear the interface and the filteredList
     	// textAreaConsole.clear();
-   
+		consoleText[TabLabel.Filter.ordinal()] = "";
+		printTextInConsole("", TabLabel.Filter.ordinal());
     	tableView.getItems().clear();
     	 	
     	filteredList.clear();
@@ -544,7 +545,7 @@ public class Controller {
     		}
 
 			// newline = textAreaConsole.getText() "\n" + newline;
-			printTextInConsole("", TabLabel.Filter.ordinal());
+			
 			printTextInConsole(newline, TabLabel.Filter.ordinal());
     		// textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
     		
@@ -597,6 +598,8 @@ public class Controller {
     private void startEnroll() {
     	//clear the console
     	// textAreaConsole.clear();
+		consoleText[TabLabel.List.ordinal()] = "";
+		printTextInConsole("", TabLabel.List.ordinal());
     
     	//perform linear search for each course in the tableView, if the course is checked
     	//search through the enrolled list with Course code and section
@@ -642,7 +645,7 @@ public class Controller {
     	// textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
 
 		// newline = textAreaConsole.getText() + "\n" + newline;
-		printTextInConsole("", TabLabel.List.ordinal());
+		
 		printTextInConsole(newline, TabLabel.List.ordinal());
 
     	
