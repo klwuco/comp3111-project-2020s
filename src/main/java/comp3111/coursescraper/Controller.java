@@ -254,7 +254,7 @@ public class Controller {
             int counted_course = 0;
             courses = new Vector<Course>();
             for (String subject : subjects) {
-                counted_course += searchCourse(subject);
+                counted_course = searchCourse(subject);
                 System.out.println(subject + " is done");
                 Platform.runLater( () -> progressbar.setProgress(progressbar.getProgress() + increment) );
                 try {Thread.sleep(100);} catch (Exception e) {}
@@ -263,11 +263,10 @@ public class Controller {
 
             String newline = "Total Number of Courses fetched : ";
             newline += Integer.toString(counted_course) + "\n";
-            printTextInConsole(newline, TabLabel.AllSubject.ordinal());
-            enableTabInput(true);
-			// buttonSearchAll.setDisable(false);
             Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
-            enableSFQInstructorButton();
+			enableTabInput(true);
+			enableSFQInstructorButton();
+			printTextInConsole(newline, TabLabel.AllSubject.ordinal());
         }).start();
     }
    
@@ -342,13 +341,11 @@ public class Controller {
 
         new Thread(() -> {
 			enableTabInput(false);
-			// buttonSearchAll.setDisable(true);
             subjectIsSearched();
 			courses = new Vector<Course>();
             if(subjects != null)
                 searchCourse(textfieldSubject.getText());
 			enableTabInput(true);
-			// buttonSearchAll.setDisable(false);
             Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
             enableSFQInstructorButton();
         }).start();
@@ -413,7 +410,7 @@ public class Controller {
     @FXML
     void filter() {
     	//Clear the interface and the filteredList
-    	textAreaConsole.clear();
+    	// textAreaConsole.clear();
    
     	tableView.getItems().clear();
     	 	
@@ -544,7 +541,11 @@ public class Controller {
                    
                 }
     		}
-    		textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+
+			newline = textAreaConsole.getText() + "\n" + newline;
+
+			printTextInConsole(newline, TabLabel.Filter.ordinal());
+    		// textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
     		
     	}
         //start to fill in the tableView for task3
@@ -594,7 +595,7 @@ public class Controller {
      */
     private void startEnroll() {
     	//clear the console
-    	textAreaConsole.clear();
+    	// textAreaConsole.clear();
     
     	//perform linear search for each course in the tableView, if the course is checked
     	//search through the enrolled list with Course code and section
@@ -637,7 +638,12 @@ public class Controller {
     		newline += enrolledList.get(i).getCourseCode() + " " + enrolledList.get(i).getSection() + " " + enrolledList.get(i).getCourseName() + enrolledList.get(i).getInstructor() + "\n";   		
     	}
     	
-    	textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+    	// textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
+
+		newline = textAreaConsole.getText() + "\n" + newline;
+
+		printTextInConsole(newline, TabLabel.List.ordinal());
+
     	
     }
 
@@ -682,8 +688,7 @@ public class Controller {
             Platform.runLater( () -> {
                 final Alert alert = new Alert(AlertType.ERROR);
                 alert.setTitle("Error Dialog");
-                alert.setHeaderText(subject); // testing
-                // alert.setHeaderText(null);
+                alert.setHeaderText(null);
                 alert.setContentText("404 NOT FOUND! \n Please Check the Base URL, Term and Subject.");
                 alert.showAndWait();
 				
