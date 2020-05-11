@@ -410,7 +410,7 @@ public class Controller {
     @FXML
     void filter() {
     	//Clear the interface and the filteredList
-    	// textAreaConsole.clear();
+
 		consoleText[TabLabel.Filter.ordinal()] = "";
 		printTextInConsole("", TabLabel.Filter.ordinal());
     	tableView.getItems().clear();
@@ -528,26 +528,21 @@ public class Controller {
     		//with all of their sections and slots
     		String newline = c.getTitle() + "\n";
     		
-            
     		for (Section section : c.getSection()) {
                 if(section != null){
                     int i = 0;
                     for(Slot t : section.getSlot())
                         if(t != null)
-                        	
                             newline += section + " Slot " + i++ + ":" + t + "\n";
-					newline += "\n";
                     //update the filteredList for task3, and pulling the checkboxes to the controller
                     filteredList.add(new FList(c.getCourseCode(),section.getSectionCode(),c.getTitle(),section.getInstructor(),section));
                     enrollBox.add(filteredList.get(filteredList.size()-1).getEnroll());
                    
                 }
     		}
-
-			// newline = textAreaConsole.getText() "\n" + newline;
+			newline += "\n";
 			
 			printTextInConsole(newline, TabLabel.Filter.ordinal());
-    		// textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
     		
     	}
         //start to fill in the tableView for task3
@@ -597,7 +592,7 @@ public class Controller {
      */
     private void startEnroll() {
     	//clear the console
-    	// textAreaConsole.clear();
+
 		consoleText[TabLabel.List.ordinal()] = "";
 		printTextInConsole("", TabLabel.List.ordinal());
     
@@ -640,11 +635,7 @@ public class Controller {
     	String newline = "The following sections are enrolled:" + "\n";
     	for(int i = 0; i < enrolledList.size(); ++i) {
     		newline += enrolledList.get(i).getCourseCode() + " " + enrolledList.get(i).getSection() + " " + enrolledList.get(i).getCourseName() + enrolledList.get(i).getInstructor() + "\n";   		
-    	}
-    	
-    	// textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
-
-		// newline = textAreaConsole.getText() + "\n" + newline;
+    	}  	
 		
 		printTextInConsole(newline, TabLabel.List.ordinal());
 
