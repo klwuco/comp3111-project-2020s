@@ -61,6 +61,8 @@ public class Controller {
     private List<FList> enrolledList = new ArrayList<FList>();
     
     private List<CheckBox> enrollBox = new ArrayList<CheckBox>();
+    
+    private List<Label> timeTableEntries = new ArrayList<Label>();
 
 	private HashSet<Color> timetableColors = new HashSet<Color>();
   
@@ -762,9 +764,21 @@ public class Controller {
      * 
      */
 	private void renderTimeTable() {
+		clearTimeTable();
     	for(FList flist: enrolledList)
     		renderSection(flist.getCourseCode(), flist.get_section());
     }
+	
+	/**
+	 * Clears the timetable
+	 */
+	private void clearTimeTable() {
+		AnchorPane ap = (AnchorPane)tabTimetable.getContent();
+		for(Label label: timeTableEntries) {
+			ap.getChildren().remove(label);
+		}
+		timeTableEntries.clear();
+	}
     
 	/**
 	 * Render the section onto the timetable.
@@ -793,6 +807,7 @@ public class Controller {
 	    	label.setMinHeight(height);
 	    	label.setMaxHeight(height);
 	    	ap.getChildren().add(label);
+	    	timeTableEntries.add(label);
     	}
     }
     
