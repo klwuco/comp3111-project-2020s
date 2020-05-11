@@ -240,6 +240,11 @@ public class Scraper {
 	private HashMap<String, Double> _courseLookUpTable = new HashMap<String, Double>();
 	private HashMap<String, Instructor> _instructorSFQTable = new HashMap<String, Instructor>();
 	
+	/**
+	 * Scrapes SFQ data from the website. Needs to call SFQLookUp to look up course SFQ.
+	 * @param baseurl The baseurl to scrape
+	 * @throws Exception 404 Errors, and scraper errors
+	 */
 	public void scrapeSFQ(String baseurl) throws Exception {
 		// Reset tables
 		_courseLookUpTable = new HashMap<String, Double>();
