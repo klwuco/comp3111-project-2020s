@@ -803,7 +803,10 @@ public class Controller {
 	    	label.setMinWidth(LABEL_WIDTH);
 	    	label.setMaxWidth(LABEL_WIDTH);
 	    	int minute = slot.getDuration();
-	    	float height = minute/2.0f;
+	    	float height = minute/3.0f;
+	    	if(height < 20.0f) {
+	    		label.setText(labelText.replace('\n', ' '));
+	    	}
 	    	label.setMinHeight(height);
 	    	label.setMaxHeight(height);
 	    	ap.getChildren().add(label);
