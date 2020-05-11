@@ -263,10 +263,10 @@ public class Controller {
 
             String newline = "Total Number of Courses fetched : ";
             newline += Integer.toString(counted_course) + "\n";
-            Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
+			printTextInConsole(newline, TabLabel.AllSubject.ordinal());
+			Platform.runLater(() -> {filter();}); //For doing list after searching,without filter
 			enableTabInput(true);
 			enableSFQInstructorButton();
-			printTextInConsole(newline, TabLabel.AllSubject.ordinal());
         }).start();
     }
    
@@ -535,6 +535,7 @@ public class Controller {
                         if(t != null)
                         	
                             newline += section + " Slot " + i++ + ":" + t + "\n";
+					newline += "\n";
                     //update the filteredList for task3, and pulling the checkboxes to the controller
                     filteredList.add(new FList(c.getCourseCode(),section.getSectionCode(),c.getTitle(),section.getInstructor(),section));
                     enrollBox.add(filteredList.get(filteredList.size()-1).getEnroll());
@@ -542,8 +543,8 @@ public class Controller {
                 }
     		}
 
-			newline = textAreaConsole.getText() + "\n" + newline;
-
+			// newline = textAreaConsole.getText() "\n" + newline;
+			printTextInConsole("", TabLabel.Filter.ordinal());
 			printTextInConsole(newline, TabLabel.Filter.ordinal());
     		// textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
     		
@@ -640,8 +641,8 @@ public class Controller {
     	
     	// textAreaConsole.setText(textAreaConsole.getText() + "\n" + newline);
 
-		newline = textAreaConsole.getText() + "\n" + newline;
-
+		// newline = textAreaConsole.getText() + "\n" + newline;
+		printTextInConsole("", TabLabel.List.ordinal());
 		printTextInConsole(newline, TabLabel.List.ordinal());
 
     	
